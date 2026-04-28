@@ -39,7 +39,7 @@ function getAuthUrl(userId) {
         access_type: 'offline',
         scope: SCOPES,
         state: userId,
-        prompt: 'consent',
+        prompt: 'select_account consent',
     });
 }
 
@@ -60,11 +60,12 @@ async function handleCallback(code, userId) {
     const gmailEmail = userInfo.data.email;
 
     // Store tokens in DB
-    const existing = get('SELECT user_id FROM gmail_tokens WHERE user_id = ?', [userId]);
+    const existing = get('SELECT refresh_token FROM gmail_tokens WHERE user_id = ?', [userId]);
     if (existing) {
+        const refreshToken = tokens.refresh_token || existing.refresh_token || '';
         run(
             'UPDATE gmail_tokens SET access_token = ?, refresh_token = ?, token_expiry = ?, gmail_email = ? WHERE user_id = ?',
-            [tokens.access_token, tokens.refresh_token || '', tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : '', gmailEmail, userId]
+            [tokens.access_token, refreshToken, tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : '', gmailEmail, userId]
         );
     } else {
         run(
