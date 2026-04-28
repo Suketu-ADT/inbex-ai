@@ -789,6 +789,27 @@ input:checked+.slider:before {
     margin-bottom: var(--sp-2);
 }
 
+.input-field {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.input-field:focus {
+    border-color: var(--clr-accent-1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+}
+
+.input-field::placeholder {
+    color: var(--text-muted);
+}
+
 .draft-box {
     background: var(--bg-input);
     border: 1px solid var(--border-color);

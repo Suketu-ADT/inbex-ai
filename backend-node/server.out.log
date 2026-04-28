@@ -1,0 +1,6 @@
+🚀 INBEX Backend starting up...
+✅ Database tables ready
+✅ Email classifier ready
+[AutomationScheduler] Started polling every 30 seconds
+✅ INBEX is ready at http://127.0.0.1:3000
+📖 Health Check: http://127.0.0.1:3000/health

@@ -110,6 +110,30 @@ function createAllTables() {
         )
     `);
 
+    db.run(`
+        CREATE TABLE IF NOT EXISTS email_automations (
+            id               TEXT PRIMARY KEY,
+            user_id          TEXT NOT NULL,
+            name             TEXT NOT NULL,
+            recipient_email  TEXT NOT NULL,
+            subject          TEXT NOT NULL,
+            body             TEXT NOT NULL,
+            send_time        TEXT NOT NULL,
+            timezone         TEXT NOT NULL,
+            is_active        INTEGER DEFAULT 1,
+            run_count        INTEGER DEFAULT 0,
+            last_run_at      TEXT,
+            last_attempt_at  TEXT,
+            last_error       TEXT,
+            created_at       TEXT DEFAULT (datetime('now')),
+            updated_at       TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    db.run(`CREATE INDEX IF NOT EXISTS idx_email_automations_user_id ON email_automations(user_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_email_automations_active ON email_automations(is_active)`);
+
     saveDatabase();
 }
 

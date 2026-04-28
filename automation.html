@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="INBEX AI SaaS Dashboard - Automation" />
-    <title>Automation — INBEX</title>
+    <title>Automation - INBEX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
@@ -15,7 +15,6 @@
 </head>
 
 <body>
-    <!-- Top Navigation -->
     <nav class="top-nav" aria-label="Main Navigation">
         <div class="nav-left">
             <a href="dashboard.html" class="logo-wrap" aria-label="INBEX home">
@@ -46,7 +45,6 @@
         </div>
         <div class="nav-right">
             <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
-                <!-- Sun Icon for Light Mode (hidden in dark mode) -->
                 <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -59,321 +57,151 @@
                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
-                <!-- Moon Icon for Dark Mode (hidden in light mode) -->
                 <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </button>
             <div class="user-profile">
-                <img src="https://ui-avatars.com/api/?name=Alex+Johnson&background=6366f1&color=fff&rounded=true"
-                    alt="Alex Johnson" class="avatar" />
+                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&rounded=true"
+                    alt="User" class="avatar" />
             </div>
         </div>
     </nav>
 
-    <!-- Main Layout Container -->
     <main class="dashboard-container layout-reveal">
-
-        <!-- Header -->
         <header class="welcome-section"
-            style="flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            style="flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4);">
             <div>
                 <h1 class="welcome-title">Automation Center</h1>
-                <p class="welcome-subtitle">Manage intelligent workflows and recurring actions</p>
+                <p class="welcome-subtitle">Each user can set a daily email, choose the send time, and review all saved automations here.</p>
             </div>
-            <button class="btn btn-primary">
+            <button id="open-automation-form-btn" class="btn btn-primary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Create Workflow
+                Add Automation
             </button>
         </header>
 
-        <!-- Main Grid Layout (70/30) -->
         <div class="main-grid">
-
-            <!-- LEFT (70%): Active Workflows & Scheduled Tasks -->
-            <div style="display: flex; flex-direction: column; gap: var(--sp-6);">
-
-                <!-- INBEX Category-Based Rules -->
+            <div style="display:flex;flex-direction:column;gap:var(--sp-6);">
                 <section class="panel">
                     <header class="panel-header">
-                        <h2 class="panel-title">Category-Based Rules</h2>
-                        <span class="badge badge-ai">⚡ Agentic AI</span>
-                    </header>
-                    <div class="workflow-grid" id="category-rules-grid">
-
-                        <!-- Rule: HR -->
-                        <article class="workflow-card" data-category="HR">
-                            <div class="workflow-header">
-                                <div style="display:flex;align-items:center;gap:var(--sp-2);">
-                                    <span class="badge badge-hr">HR</span>
-                                    <h3 class="workflow-title" style="margin:0;">HR Auto-Response</h3>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="workflow-details">
-                                <p><span class="badge badge-ai">Trigger: ML Category = HR</span></p>
-                                <p><strong>IF</strong> category = <code style="color:#c084fc;">HR</code></p>
-                                <p><strong>THEN</strong> Send HR standard response → Forward to hr@company.com</p>
-                            </div>
-                            <div class="workflow-actions">
-                                <button class="btn btn-outline small" style="flex:1;" onclick="showToastAuto('HR rule executed (simulated)')">Run Now</button>
-                                <button class="btn btn-outline small">Edit</button>
-                            </div>
-                        </article>
-
-                        <!-- Rule: Finance -->
-                        <article class="workflow-card" data-category="Finance">
-                            <div class="workflow-header">
-                                <div style="display:flex;align-items:center;gap:var(--sp-2);">
-                                    <span class="badge badge-finance">Finance</span>
-                                    <h3 class="workflow-title" style="margin:0;">Finance Tag & Notify</h3>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="workflow-details">
-                                <p><span class="badge badge-ai">Trigger: ML Category = Finance</span></p>
-                                <p><strong>IF</strong> category = <code style="color:#34d399;">Finance</code></p>
-                                <p><strong>THEN</strong> Tag 'Finance' → Hold for approval → Notify finance@company.com</p>
-                            </div>
-                            <div class="workflow-actions">
-                                <button class="btn btn-outline small" style="flex:1;" onclick="showToastAuto('Finance rule executed (simulated)')">Run Now</button>
-                                <button class="btn btn-outline small">Edit</button>
-                            </div>
-                        </article>
-
-                        <!-- Rule: Work -->
-                        <article class="workflow-card" data-category="Work">
-                            <div class="workflow-header">
-                                <div style="display:flex;align-items:center;gap:var(--sp-2);">
-                                    <span class="badge badge-info">Work</span>
-                                    <h3 class="workflow-title" style="margin:0;">Work Priority Triage</h3>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="workflow-details">
-                                <p><span class="badge badge-ai">Trigger: ML Category = Work</span></p>
-                                <p><strong>IF</strong> category = <code style="color:#60a5fa;">Work</code></p>
-                                <p><strong>THEN</strong> Flag high-priority → Add to Priority Inbox → Draft reply</p>
-                            </div>
-                            <div class="workflow-actions">
-                                <button class="btn btn-outline small" style="flex:1;" onclick="showToastAuto('Work rule executed (simulated)')">Run Now</button>
-                                <button class="btn btn-outline small">Edit</button>
-                            </div>
-                        </article>
-
-                        <!-- Rule: Personal -->
-                        <article class="workflow-card" data-category="Personal">
-                            <div class="workflow-header">
-                                <div style="display:flex;align-items:center;gap:var(--sp-2);">
-                                    <span class="badge" style="background:rgba(245,158,11,0.15);color:#fbbf24;">Personal</span>
-                                    <h3 class="workflow-title" style="margin:0;">Personal Inbox Route</h3>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="workflow-details">
-                                <p><span class="badge badge-ai">Trigger: ML Category = Personal</span></p>
-                                <p><strong>IF</strong> category = <code style="color:#fbbf24;">Personal</code></p>
-                                <p><strong>THEN</strong> Move to Personal folder → Low priority queue</p>
-                            </div>
-                            <div class="workflow-actions">
-                                <button class="btn btn-outline small" style="flex:1;" onclick="showToastAuto('Personal rule executed (simulated)')">Run Now</button>
-                                <button class="btn btn-outline small">Edit</button>
-                            </div>
-                        </article>
-
-                        <!-- Rule: Spam -->
-                        <article class="workflow-card" data-category="Spam">
-                            <div class="workflow-header">
-                                <div style="display:flex;align-items:center;gap:var(--sp-2);">
-                                    <span class="badge badge-urgent">Spam</span>
-                                    <h3 class="workflow-title" style="margin:0;">Spam Quarantine</h3>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="workflow-details">
-                                <p><span class="badge badge-ai">Trigger: ML Category = Spam</span></p>
-                                <p><strong>IF</strong> category = <code style="color:#f87171;">Spam</code></p>
-                                <p><strong>THEN</strong> Quarantine → No reply → Log in Spam report</p>
-                            </div>
-                            <div class="workflow-actions">
-                                <button class="btn btn-outline small" style="flex:1;" onclick="showToastAuto('Spam quarantined (simulated)')">Run Now</button>
-                                <button class="btn btn-outline small">Edit</button>
-                            </div>
-                        </article>
-
-                    </div>
-                </section>
-
-                <!-- Scheduled Tasks Table -->
-                <section class="panel">
-                    <header class="panel-header">
-                        <h2 class="panel-title">Scheduled Tasks</h2>
+                        <div>
+                            <h2 class="panel-title">Your Daily Email Automations</h2>
+                            <p class="welcome-subtitle" style="margin-top:8px;">Only the logged-in user's automations are shown below.</p>
+                        </div>
+                        <span id="gmail-status-pill" class="badge badge-muted">Checking Gmail...</span>
                     </header>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Task Name</th>
-                                    <th>Frequency</th>
+                                    <th>Name</th>
+                                    <th>Recipient</th>
+                                    <th>Every Day At</th>
                                     <th>Next Run</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="automation-table-body">
                                 <tr>
-                                    <td>Weekly Data Sync</td>
-                                    <td>Every Monday</td>
-                                    <td>Oct 12, 02:00 AM</td>
-                                    <td><span class="badge badge-success"
-                                            style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Active</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>CRM Invoice Export</td>
-                                    <td>Monthly (1st)</td>
-                                    <td>Nov 1, 00:00 AM</td>
-                                    <td><span class="badge badge-success"
-                                            style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Active</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Drip Campaign Batch</td>
-                                    <td>Daily</td>
-                                    <td>Today, 09:00 AM</td>
-                                    <td><span class="badge badge-warn"
-                                            style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Pending</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Stale Lead Cleanup</td>
-                                    <td>Weekly Friday</td>
-                                    <td>Oct 16, 11:00 PM</td>
-                                    <td><span class="badge badge-muted"
-                                            style="background: rgba(100, 116, 139, 0.15); color: #94a3b8;">Paused</span>
-                                    </td>
+                                    <td colspan="6" style="text-align:center;color:var(--text-muted);padding:28px;">Loading automations...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </section>
 
+                <section class="panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">Automation Details</h2>
+                    </header>
+                    <div id="automation-cards" class="workflow-grid">
+                        <article class="workflow-card">
+                            <div class="workflow-details">
+                                <p style="color:var(--text-muted);">Create an automation to see the email content, recent run status, and schedule details here.</p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
             </div>
 
-            <!-- RIGHT (30%): Bulk Campaign Performance -->
-            <section class="panel" style="align-self: start;">
+            <section class="panel" style="align-self:start;">
                 <header class="panel-header">
-                    <h2 class="panel-title">Bulk Campaign Performance</h2>
-                    <span class="badge badge-info">Q4 Outreach</span>
+                    <h2 class="panel-title" id="automation-form-title">Create Daily Email</h2>
+                    <span class="badge badge-ai">Daily</span>
                 </header>
                 <div class="assistant-content">
-                    <div class="draft-preview">
-                        <label class="section-label">Last Campaign Stats</label>
-                        <div
-                            style="display: flex; flex-direction: column; gap: var(--sp-4); margin-bottom: var(--sp-4);">
+                    <form id="automation-form" style="display:flex;flex-direction:column;gap:var(--sp-4);">
+                        <input type="hidden" id="automation-id" />
+                        <input type="hidden" id="automation-timezone" />
+
+                        <div>
+                            <label class="section-label" for="automation-name">Automation Name</label>
+                            <input id="automation-name" class="input-field" type="text" placeholder="Daily follow-up" required />
+                        </div>
+
+                        <div>
+                            <label class="section-label" for="automation-recipient">Recipient Email</label>
+                            <input id="automation-recipient" class="input-field" type="email" placeholder="client@example.com" required />
+                        </div>
+
+                        <div>
+                            <label class="section-label" for="automation-subject">Subject</label>
+                            <input id="automation-subject" class="input-field" type="text" placeholder="Daily update" required />
+                        </div>
+
+                        <div>
+                            <label class="section-label" for="automation-body">Email Content</label>
+                            <textarea id="automation-body" class="input-field" rows="8"
+                                placeholder="Write the email content that should go every day." required
+                                style="resize:vertical;min-height:180px;padding-top:14px;"></textarea>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--sp-4);">
                             <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                    <span style="font-size: var(--text-sm); color: var(--text-secondary);">Emails
-                                        Sent</span>
-                                    <span style="font-size: var(--text-sm); font-weight: 600;">12,450</span>
-                                </div>
-                                <div class="efficiency-bar-container">
-                                    <div class="efficiency-bar" style="width: 100%;"></div>
-                                </div>
+                                <label class="section-label" for="automation-time">Send Time</label>
+                                <input id="automation-time" class="input-field" type="time" required />
                             </div>
                             <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                    <span style="font-size: var(--text-sm); color: var(--text-secondary);">Open
-                                        Rate</span>
-                                    <span
-                                        style="font-size: var(--text-sm); font-weight: 600; color: var(--clr-success);">42.8%</span>
-                                </div>
-                                <div class="efficiency-bar-container">
-                                    <div class="efficiency-bar" style="width: 42.8%; background: var(--clr-success);">
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                    <span style="font-size: var(--text-sm); color: var(--text-secondary);">Click
-                                        Rate</span>
-                                    <span
-                                        style="font-size: var(--text-sm); font-weight: 600; color: var(--clr-info);">14.2%</span>
-                                </div>
-                                <div class="efficiency-bar-container">
-                                    <div class="efficiency-bar" style="width: 14.2%; background: var(--clr-info);">
-                                    </div>
-                                </div>
+                                <label class="section-label" for="automation-timezone-display">Timezone</label>
+                                <input id="automation-timezone-display" class="input-field" type="text" readonly />
                             </div>
                         </div>
 
-                        <label class="section-label">Top Performing Subject</label>
-                        <div class="draft-box" style="margin-bottom: var(--sp-4);">
-                            <p style="font-weight: 500;">"Exclusive early access: INBEX features inside"</p>
-                        </div>
+                        <label style="display:flex;align-items:center;gap:12px;color:var(--text-secondary);font-size:var(--text-sm);">
+                            <input id="automation-active" type="checkbox" checked />
+                            Active immediately
+                        </label>
 
-                        <div class="draft-actions">
-                            <button class="btn btn-outline" style="width: 100%;">View Full Report</button>
+                        <div class="draft-actions" style="display:flex;gap:var(--sp-3);flex-wrap:wrap;">
+                            <button id="automation-submit-btn" type="submit" class="btn btn-primary" style="flex:1;">Save Automation</button>
+                            <button id="automation-reset-btn" type="button" class="btn btn-outline" style="flex:1;">Clear</button>
+                        </div>
+                    </form>
+
+                    <div class="draft-preview" style="margin-top:var(--sp-5);">
+                        <label class="section-label">What This Does</label>
+                        <div class="draft-box">
+                            <p>The user chooses the email address, the content, and the daily send time.</p>
+                            <p>INBEX sends that email every day using the connected Gmail account for that user.</p>
                         </div>
                     </div>
                 </div>
             </section>
-
         </div>
     </main>
 
-    <!-- Toast -->
-    <div id="auto-toast" style="position:fixed;bottom:24px;right:24px;background:var(--bg-surface);border:1px solid var(--border-highlight);border-radius:var(--r-md);padding:12px 20px;font-size:var(--text-sm);color:var(--text-primary);box-shadow:var(--shadow-soft);z-index:9999;transform:translateY(20px);opacity:0;pointer-events:none;transition:all 0.25s ease;border-left:3px solid var(--clr-success);" role="alert" aria-live="polite"></div>
+    <div id="auto-toast"
+        style="position:fixed;bottom:24px;right:24px;background:var(--bg-surface);border:1px solid var(--border-highlight);border-radius:var(--r-md);padding:12px 20px;font-size:var(--text-sm);color:var(--text-primary);box-shadow:var(--shadow-soft);z-index:9999;transform:translateY(20px);opacity:0;pointer-events:none;transition:all 0.25s ease;border-left:3px solid var(--clr-success);"
+        role="alert" aria-live="polite"></div>
 
-    <script src="dashboard.js"></script>
-    <script>
-    function showToastAuto(msg) {
-        const t = document.getElementById('auto-toast');
-        t.textContent = msg;
-        t.style.opacity = '1';
-        t.style.transform = 'translateY(0)';
-        t.style.pointerEvents = 'auto';
-        clearTimeout(window._autoToastTimer);
-        window._autoToastTimer = setTimeout(() => {
-            t.style.opacity = '0';
-            t.style.transform = 'translateY(20px)';
-        }, 3000);
-    }
-
-    // Auto-highlight the workflow card for a category passed from classify.html
-    document.addEventListener('DOMContentLoaded', () => {
-        const params = new URLSearchParams(window.location.search);
-        const cat = params.get('category');
-        if (cat) {
-            const card = document.querySelector(`[data-category="${cat}"]`);
-            if (card) {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                card.style.outline = '2px solid var(--clr-accent-1)';
-                card.style.boxShadow = 'var(--shadow-glow)';
-                showToastAuto(`⚡ Creating rule for ${cat} category`);
-            }
-        }
-    });
-    </script>
+    <script src="automation.js"></script>
 </body>
 
-</html>
+</html>

@@ -10,6 +10,7 @@ const path = require('path');
 const config = require('./config');
 const { initDatabase, createAllTables } = require('./database');
 const classifier = require('./services/classifierService');
+const automationScheduler = require('./services/automationSchedulerService');
 
 const app = express();
 
@@ -57,6 +58,7 @@ function loadRoutes() {
     app.use(require('./routes/reports'));
     app.use(require('./routes/settings'));
     app.use(require('./routes/gmail'));
+    app.use(require('./routes/automations'));
 
     // 404
     app.use((req, res) => {
@@ -80,6 +82,7 @@ async function start() {
     createAllTables();
     console.log('✅ Database tables ready');
     console.log('✅ Email classifier ready');
+    automationScheduler.startScheduler();
 
     loadRoutes();
 
