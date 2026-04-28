@@ -192,4 +192,11 @@ async function generateSummary(emailText) {
     return 'Failed to generate summary.';
 }
 
+/**
+ * Return the rule-based fallback template for a category.
+ */
+function getFallbackReply(category) {
+    return FALLBACK_TEMPLATES[category] || FALLBACK_TEMPLATES.Work;
+}
+
 module.exports = { generateReply, getFallbackReply, generateCompose, generateSummary };
