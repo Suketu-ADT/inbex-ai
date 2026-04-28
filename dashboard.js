@@ -664,7 +664,17 @@ function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Expose for inline onclick handlers
+// AI Compose Logic
+function openComposeModal() {
+    document.getElementById('compose-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeComposeModal() {
+    document.getElementById('compose-modal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
 async function loadAutomationTasks() {
     const list = document.getElementById('dashboard-tasks-list');
     if (!list) return;
