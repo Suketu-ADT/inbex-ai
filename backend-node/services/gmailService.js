@@ -266,11 +266,16 @@ function disconnect(userId) {
 
 // ── Helpers ──
 function decodeBase64(data) {
-    return Buffer.from(data.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8');
+    if (!data) return '';
+    // Handle URL-safe base64 and standard base64
+    const base64 = data.replace(/-/g, '+').replace(/_/g, '/');
+    return Buffer.from(base64, 'base64').toString('utf-8');
 }
 
 function stripHtml(html) {
-    return html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    if (!html) return '';
+    return html
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
         .replace(/<[^>]+>/g, ' ')
         .replace(/&nbsp;/g, ' ')
