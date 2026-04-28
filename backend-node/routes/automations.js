@@ -137,6 +137,40 @@ router.delete('/automations/:id', requireAuth, (req, res) => {
     return res.status(204).send();
 });
 
+router.post('/automations/bulk', requireAuth, async (req, res) => {
+    const { name, recipient_emails, subject, body } = req.body;
+
+    if (!recipient_emails || !subject || !body) {
+        return res.status(422).json({ detail: 'Recipients, subject, and body are required.' });
+    }
+
+    const emails = recipient_emails.split(',').map(e => e.trim()).filter(e => e.length > 0);
+    const valid = emails.every(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+    if (emails.length === 0 || !valid) {
+        return res.status(422).json({ detail: 'One or more recipient emails are invalid.' });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const email of emails) {
+        try {
+            await scheduler.runSingleEmail(req.user.id, email, subject, body);
+            successCount++;
+        } catch (err) {
+            console.error(`[BulkSend] Failed to send to ${email}:`, err.message);
+            failCount++;
+        }
+    }
+
+    return res.json({
+        success: true,
+        success_count: successCount,
+        fail_count: failCount,
+        total: emails.length
+    });
+});
+
 function getUserAutomation(id, userId) {
     return get(
         `SELECT * FROM email_automations
@@ -156,10 +190,12 @@ function validatePayload(body, { partial = false } = {}) {
     }
 
     if (!partial || body.recipient_email !== undefined) {
-        if (!body.recipient_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.recipient_email.trim())) {
-            return { error: 'A valid recipient email is required.' };
+        const emails = (body.recipient_email || '').split(',').map(e => e.trim()).filter(e => e.length > 0);
+        const valid = emails.every(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+        if (emails.length === 0 || !valid) {
+            return { error: 'One or more recipient emails are invalid.' };
         }
-        value.recipient_email = body.recipient_email.trim().toLowerCase();
+        value.recipient_email = emails.join(', ').toLowerCase();
     }
 
     if (!partial || body.subject !== undefined) {

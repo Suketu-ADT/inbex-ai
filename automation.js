@@ -5,6 +5,7 @@
 
 const API_BASE = '';
 let automations = [];
+let currentMode = 'recurring'; // 'recurring' or 'bulk'
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.Auth) window.Auth.requireAuth();
@@ -60,12 +61,57 @@ function initTimezone() {
 }
 
 function bindEvents() {
-    document.getElementById('automation-form').addEventListener('submit', saveAutomation);
+    document.getElementById('automation-form').addEventListener('submit', handleFormSubmit);
     document.getElementById('automation-reset-btn').addEventListener('click', resetForm);
     document.getElementById('open-automation-form-btn').addEventListener('click', () => {
         document.getElementById('automation-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
         document.getElementById('automation-name').focus();
     });
+
+    // Tab switching
+    document.getElementById('tab-recurring').addEventListener('click', () => setMode('recurring'));
+    document.getElementById('tab-bulk').addEventListener('click', () => setMode('bulk'));
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    const recurringBtn = document.getElementById('tab-recurring');
+    const bulkBtn = document.getElementById('tab-bulk');
+    const recurringFields = document.getElementById('recurring-only-fields');
+    const submitBtn = document.getElementById('automation-submit-btn');
+    const typeBadge = document.getElementById('automation-type-badge');
+    const formTitle = document.getElementById('automation-form-title');
+
+    if (mode === 'recurring') {
+        recurringBtn.classList.add('active');
+        bulkBtn.classList.remove('active');
+        recurringFields.style.display = 'block';
+        submitBtn.textContent = document.getElementById('automation-id').value ? 'Update Automation' : 'Save Automation';
+        typeBadge.textContent = 'Daily';
+        formTitle.textContent = document.getElementById('automation-id').value ? 'Edit Daily Email' : 'Create Daily Email';
+        
+        // Ensure inputs are required
+        document.getElementById('automation-time').required = true;
+    } else {
+        bulkBtn.classList.add('active');
+        recurringBtn.classList.remove('active');
+        recurringFields.style.display = 'none';
+        submitBtn.textContent = 'Send Bulk Broadcast Now';
+        typeBadge.textContent = 'Bulk';
+        formTitle.textContent = 'Send Bulk Broadcast';
+        
+        // Time is not required for bulk
+        document.getElementById('automation-time').required = false;
+    }
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    if (currentMode === 'recurring') {
+        await saveAutomation();
+    } else {
+        await sendBulkBroadcast();
+    }
 }
 
 async function checkGmailStatus() {
@@ -204,9 +250,7 @@ function renderAutomationCards() {
     }).join('');
 }
 
-async function saveAutomation(event) {
-    event.preventDefault();
-
+async function saveAutomation() {
     const id = document.getElementById('automation-id').value;
     const payload = {
         name: document.getElementById('automation-name').value.trim(),
@@ -243,9 +287,43 @@ async function saveAutomation(event) {
     }
 }
 
+async function sendBulkBroadcast() {
+    const payload = {
+        name: document.getElementById('automation-name').value.trim(),
+        recipient_emails: document.getElementById('automation-recipient').value.trim(),
+        subject: document.getElementById('automation-subject').value.trim(),
+        body: document.getElementById('automation-body').value.trim(),
+    };
+
+    const submitBtn = document.getElementById('automation-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending Bulk...';
+
+    try {
+        const response = await fetch(`${API_BASE}/automations/bulk`, {
+            method: 'POST',
+            headers: window.Auth.getHeaders(),
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data?.detail || 'Failed to send bulk broadcast');
+
+        showToastAuto(`Broadcast complete! Sent: ${data.success_count}, Failed: ${data.fail_count}`, 'success');
+        resetForm();
+    } catch (err) {
+        showToastAuto(err.message, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Bulk Broadcast Now';
+    }
+}
+
 function editAutomation(id) {
     const automation = automations.find((item) => item.id === id);
     if (!automation) return;
+
+    setMode('recurring');
 
     document.getElementById('automation-id').value = automation.id;
     document.getElementById('automation-name').value = automation.name;

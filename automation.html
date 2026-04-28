@@ -132,9 +132,15 @@
             </div>
 
             <section class="panel" style="align-self:start;">
-                <header class="panel-header">
-                    <h2 class="panel-title" id="automation-form-title">Create Daily Email</h2>
-                    <span class="badge badge-ai">Daily</span>
+                <header class="panel-header" style="flex-direction: column; align-items: flex-start; gap: var(--sp-3);">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <h2 class="panel-title" id="automation-form-title">Create Daily Email</h2>
+                        <span class="badge badge-ai" id="automation-type-badge">Daily</span>
+                    </div>
+                    <div class="filter-tabs" style="width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 0;">
+                        <button class="tab active" id="tab-recurring" style="flex: 1;">Daily Recurring</button>
+                        <button class="tab" id="tab-bulk" style="flex: 1;">Bulk Broadcast</button>
+                    </div>
                 </header>
                 <div class="assistant-content">
                     <form id="automation-form" style="display:flex;flex-direction:column;gap:var(--sp-4);">
@@ -147,8 +153,9 @@
                         </div>
 
                         <div>
-                            <label class="section-label" for="automation-recipient">Recipient Email</label>
-                            <input id="automation-recipient" class="input-field" type="email" placeholder="client@example.com" required />
+                            <label class="section-label" for="automation-recipient">Recipient Emails</label>
+                            <input id="automation-recipient" class="input-field" type="text" placeholder="email1@example.com, email2@example.com" required />
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Separate multiple emails with commas.</p>
                         </div>
 
                         <div>
@@ -163,21 +170,23 @@
                                 style="resize:vertical;min-height:180px;padding-top:14px;"></textarea>
                         </div>
 
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--sp-4);">
-                            <div>
-                                <label class="section-label" for="automation-time">Send Time</label>
-                                <input id="automation-time" class="input-field" type="time" required />
+                        <div id="recurring-only-fields">
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--sp-4);">
+                                <div>
+                                    <label class="section-label" for="automation-time">Send Time</label>
+                                    <input id="automation-time" class="input-field" type="time" required />
+                                </div>
+                                <div>
+                                    <label class="section-label" for="automation-timezone-display">Timezone</label>
+                                    <input id="automation-timezone-display" class="input-field" type="text" readonly />
+                                </div>
                             </div>
-                            <div>
-                                <label class="section-label" for="automation-timezone-display">Timezone</label>
-                                <input id="automation-timezone-display" class="input-field" type="text" readonly />
-                            </div>
-                        </div>
 
-                        <label style="display:flex;align-items:center;gap:12px;color:var(--text-secondary);font-size:var(--text-sm);">
-                            <input id="automation-active" type="checkbox" checked />
-                            Active immediately
-                        </label>
+                            <label style="display:flex;align-items:center;gap:12px;color:var(--text-secondary);font-size:var(--text-sm);margin-top:var(--sp-4);">
+                                <input id="automation-active" type="checkbox" checked />
+                                Active immediately
+                            </label>
+                        </div>
 
                         <div class="draft-actions" style="display:flex;gap:var(--sp-3);flex-wrap:wrap;">
                             <button id="automation-submit-btn" type="submit" class="btn btn-primary" style="flex:1;">Save Automation</button>

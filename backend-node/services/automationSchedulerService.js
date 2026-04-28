@@ -51,6 +51,10 @@ async function runAutomationNow(automation) {
     return attemptAutomationRun(automation, { isManual: true });
 }
 
+async function runSingleEmail(userId, email, subject, body) {
+    return gmailService.sendEmail(userId, email, subject, body);
+}
+
 async function attemptAutomationRun(automation, { isManual }) {
     const attemptedAt = new Date().toISOString();
 
@@ -62,12 +66,17 @@ async function attemptAutomationRun(automation, { isManual }) {
     );
 
     try {
-        const result = await gmailService.sendEmail(
-            automation.user_id,
-            automation.recipient_email,
-            automation.subject,
-            automation.body
-        );
+        const recipients = automation.recipient_email.split(',').map(e => e.trim()).filter(e => e.length > 0);
+        let lastResult = null;
+
+        for (const email of recipients) {
+            lastResult = await gmailService.sendEmail(
+                automation.user_id,
+                email,
+                automation.subject,
+                automation.body
+            );
+        }
 
         run(
             `UPDATE email_automations
@@ -80,8 +89,8 @@ async function attemptAutomationRun(automation, { isManual }) {
             [attemptedAt, attemptedAt, attemptedAt, automation.id]
         );
 
-        console.log(`[AutomationScheduler] Sent automation "${automation.name}" (${isManual ? 'manual' : 'scheduled'})`);
-        return { success: true, messageId: result.messageId, threadId: result.threadId };
+        console.log(`[AutomationScheduler] Sent automation "${automation.name}" to ${recipients.length} recipients (${isManual ? 'manual' : 'scheduled'})`);
+        return { success: true, messageId: lastResult?.messageId, threadId: lastResult?.threadId };
     } catch (err) {
         run(
             `UPDATE email_automations
@@ -191,5 +200,6 @@ function buildNextRunDate(timeZone, hhmm, dayOffset) {
 module.exports = {
     startScheduler,
     runAutomationNow,
+    runSingleEmail,
     getAutomationPresentation,
 };
