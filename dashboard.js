@@ -716,6 +716,75 @@ async function loadActivity() {
     }
 }
 
+async function loadDashboardStats() {
+    const canvas = document.getElementById('dashCatChart');
+    if (!canvas) return;
+
+    try {
+        const resp = await fetch(`${API_BASE}/stats`, {
+            headers: window.Auth.getHeaders()
+        });
+        if (!resp.ok) throw new Error('Failed to load stats');
+        const data = await resp.json();
+
+        // Update top-level total stat if applicable
+        const statTotal = document.getElementById('stat-total');
+        if (statTotal) statTotal.textContent = data.cards.total_processed.toLocaleString();
+
+        const catLabels = data.distribution.map(d => d.label);
+        const catData   = data.distribution.map(d => d.value);
+        const catColors = ['#60a5fa', '#c084fc', '#34d399', '#fbbf24', '#f87171'];
+        const total = catData.reduce((a, b) => a + b, 0);
+
+        const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{ 
+                    data: catData, 
+                    backgroundColor: catColors, 
+                    borderColor: isDark() ? '#040714' : '#f1f5f9', 
+                    borderWidth: 3, 
+                    hoverOffset: 6 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: isDark() ? '#0c1230' : '#fff',
+                        callbacks: {
+                            label: c => ` ${c.label}: ${(c.parsed/total*100).toFixed(1)}%`
+                        }
+                    }
+                }
+            }
+        });
+
+        const legend = document.getElementById('dash-cat-legend');
+        if (legend) {
+            legend.innerHTML = '';
+            catLabels.forEach((lbl, i) => {
+                const pct = (catData[i] / total * 100).toFixed(1);
+                legend.innerHTML += `
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};"></span>
+                        <span style="font-size:0.85rem;color:var(--text-secondary);flex:1;">${lbl}</span>
+                        <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">${pct}%</span>
+                    </div>`;
+            });
+        }
+    } catch (err) {
+        console.error('Dash stats error:', err);
+    }
+}
+
 function timeAgo(date) {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) return 'Just now';
@@ -840,6 +909,7 @@ async function sendAiCompose() {
 window.openComposeModal = openComposeModal;
 window.closeComposeModal = closeComposeModal;
 window.loadActivity = loadActivity;
+window.loadDashboardStats = loadDashboardStats;
 window.generateAiCompose = generateAiCompose;
 window.sendAiCompose = sendAiCompose;
 
