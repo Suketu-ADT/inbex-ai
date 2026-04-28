@@ -158,6 +158,12 @@ async function generateSummary(emailText) {
         return 'AI key not set. Summary unavailable.';
     }
 
+    // Strip any remaining HTML to clean up the input for Groq
+    const cleanText = emailText.replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 3000);
+
     const payload = {
         model: config.groqModel,
         messages: [
@@ -165,7 +171,7 @@ async function generateSummary(emailText) {
                 role: 'system', 
                 content: 'You are an email summarizer. Provide a concise, human-friendly summary of the email. DO NOT include any raw code, HTML tags, or technical snippets. Use plain text bullet points for key actions. Keep it under 60 words. Focus on the core message.' 
             },
-            { role: 'user', content: `Summarize this email:\n\n${emailText.substring(0, 3000)}` },
+            { role: 'user', content: `Summarize this email:\n\n${cleanText}` },
         ],
         max_tokens: 150,
         temperature: 0.5,

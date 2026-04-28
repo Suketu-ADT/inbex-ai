@@ -172,7 +172,7 @@ function parseEmail(message) {
         if (textPart?.body?.data) {
             body = decodeBase64(textPart.body.data);
         } else if (htmlPart?.body?.data) {
-            body = stripHtml(decodeBase64(htmlPart.body.data));
+            body = decodeBase64(htmlPart.body.data);
         }
 
         // Check nested parts (multipart/alternative inside multipart/mixed)
@@ -184,10 +184,18 @@ function parseEmail(message) {
                         body = decodeBase64(nestedText.body.data);
                         break;
                     }
+                    const nestedHtml = part.parts.find((p) => p.mimeType === 'text/html');
+                    if (nestedHtml?.body?.data) {
+                        body = decodeBase64(nestedHtml.body.data);
+                        break;
+                    }
                 }
             }
         }
     }
+
+    // Always strip HTML just in case
+    body = stripHtml(body);
 
     return {
         id: message.id,
