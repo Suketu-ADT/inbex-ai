@@ -262,7 +262,7 @@
                 <header class="panel-header">
                     <h2 class="panel-title">Recent Activity</h2>
                 </header>
-                <div class="activity-feed">
+                <div class="activity-feed" id="dashboard-activity-feed">
                     <div class="activity-item">
                         <div class="activity-icon bg-success">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -339,6 +339,9 @@
             const classified = parseInt(localStorage.getItem('inbex-classified-today') || '0');
             if (classified > 0) statTotal.textContent = (9850 + classified).toLocaleString();
         }
+
+        if (typeof loadActivity === 'function') loadActivity();
+        if (typeof loadAutomationTasks === 'function') loadAutomationTasks();
 
         const ctx = document.getElementById('dashCatChart').getContext('2d');
         new Chart(ctx, {

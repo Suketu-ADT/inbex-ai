@@ -163,9 +163,9 @@ async function generateSummary(emailText) {
         messages: [
             { 
                 role: 'system', 
-                content: 'You are an email summarizer. Provide a concise, flashcard-style summary of the following email. Use bullet points for key actions. Keep it under 60 words.' 
+                content: 'You are an email summarizer. Provide a concise, human-friendly summary of the email. DO NOT include any raw code, HTML tags, or technical snippets. Use plain text bullet points for key actions. Keep it under 60 words. Focus on the core message.' 
             },
-            { role: 'user', content: `Summarize this email:\n\n${emailText.substring(0, 2000)}` },
+            { role: 'user', content: `Summarize this email:\n\n${emailText.substring(0, 3000)}` },
         ],
         max_tokens: 150,
         temperature: 0.5,

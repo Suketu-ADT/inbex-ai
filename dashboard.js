@@ -675,6 +675,57 @@ function closeComposeModal() {
     document.body.style.overflow = '';
 }
 
+async function loadActivity() {
+    const feed = document.getElementById('dashboard-activity-feed');
+    if (!feed) return;
+
+    try {
+        const resp = await fetch(`${API_BASE}/activity`, {
+            headers: window.Auth.getHeaders()
+        });
+        if (!resp.ok) throw new Error('Failed to load');
+
+        const activity = await resp.json();
+        if (activity.length === 0) {
+            feed.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);"><p style="font-size:0.85rem;">No recent activity.</p></div>`;
+            return;
+        }
+
+        feed.innerHTML = activity.map(item => {
+            const isAuto = item.type === 'automation';
+            const iconClass = isAuto ? 'bg-info' : 'bg-success';
+            const iconSvg = isAuto 
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            
+            const timeStr = timeAgo(item.created_at);
+            const desc = isAuto 
+                ? `<strong>${escapeHtml(item.detail)}</strong> automation run.`
+                : `Email classified as <strong>${escapeHtml(item.detail)}</strong>.`;
+
+            return `
+                <div class="activity-item">
+                    <div class="activity-icon ${iconClass}">${iconSvg}</div>
+                    <div class="activity-text">${desc}</div>
+                    <span class="activity-time">${timeStr}</span>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Activity load error:', err);
+    }
+}
+
+function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return new Date(date).toLocaleDateString();
+}
+
 async function loadAutomationTasks() {
     const list = document.getElementById('dashboard-tasks-list');
     if (!list) return;
@@ -788,6 +839,7 @@ async function sendAiCompose() {
 // Expose functions
 window.openComposeModal = openComposeModal;
 window.closeComposeModal = closeComposeModal;
+window.loadActivity = loadActivity;
 window.generateAiCompose = generateAiCompose;
 window.sendAiCompose = sendAiCompose;
 

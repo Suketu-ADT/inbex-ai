@@ -247,138 +247,133 @@
         const gridColor = () => isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
         const textColor = () => isDark() ? '#94a3b8' : '#64748b';
 
-        // ── Line Chart: Email Volume ──
-        const labels = [];
-        const today = new Date();
-        for (let i = 29; i >= 0; i--) {
-            const d = new Date(today); d.setDate(d.getDate() - i);
-            labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-        }
-        const sent     = Array.from({length:30}, () => Math.floor(300 + Math.random()*250));
-        const received = Array.from({length:30}, () => Math.floor(250 + Math.random()*200));
-        const bounced  = Array.from({length:30}, () => Math.floor(5  + Math.random()*20));
+        async function loadStats() {
+            try {
+                const resp = await fetch('/stats', {
+                    headers: window.Auth.getHeaders()
+                });
+                if (!resp.ok) throw new Error('Failed to load stats');
+                const data = await resp.json();
 
-        const volumeCtx = document.getElementById('volumeChart').getContext('2d');
-        new Chart(volumeCtx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    {
-                        label: 'Sent',
-                        data: sent,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99,102,241,0.12)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Received',
-                        data: received,
-                        borderColor: '#a855f7',
-                        backgroundColor: 'rgba(168,85,247,0.08)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Bounced',
-                        data: bounced,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239,68,68,0.08)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        borderWidth: 1.5,
-                        borderDash: [4,3]
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { color: textColor(), boxWidth: 12, padding: 16, font: { family: 'Inter', size: 12 } }
-                    },
-                    tooltip: {
-                        backgroundColor: isDark() ? '#0c1230' : '#fff',
-                        borderColor: isDark() ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-                        borderWidth: 1,
-                        titleColor: isDark() ? '#f8fafc' : '#0f172a',
-                        bodyColor: isDark() ? '#94a3b8' : '#475569',
-                        padding: 12,
-                        cornerRadius: 8
-                    }
+                // Update Cards
+                document.querySelectorAll('.stat-card .stat-value')[0].textContent = data.cards.total_processed.toLocaleString();
+                document.querySelectorAll('.stat-card .stat-value')[1].textContent = data.cards.auto_handled_pct + '%';
+                document.querySelectorAll('.stat-card .stat-value')[2].textContent = data.cards.avg_response_time;
+                document.querySelectorAll('.stat-card .stat-value')[3].textContent = data.cards.avg_confidence + '%';
+
+                // Update Efficiency Bars
+                const efficiencyBars = document.querySelectorAll('.efficiency-bar');
+                const efficiencyTexts = document.querySelectorAll('.efficiency-item span:last-child');
+                if (efficiencyBars.length >= 2) {
+                    efficiencyBars[0].style.width = data.cards.auto_handled_pct + '%';
+                    efficiencyTexts[0].textContent = data.cards.auto_handled_pct + '%';
+                    
+                    const manualPct = 100 - data.cards.auto_handled_pct;
+                    efficiencyBars[1].style.width = manualPct + '%';
+                    efficiencyTexts[1].textContent = manualPct + '%';
+                }
+
+                // Update Top Workflow
+                const topWfName = document.querySelector('.draft-box h4');
+                const topWfDesc = document.querySelector('.draft-box p');
+                if (topWfName) topWfName.textContent = data.top_workflow.name;
+                if (topWfDesc) topWfDesc.textContent = `Processed ${data.top_workflow.run_count} emails.`;
+
+                // Update Line Chart: Email Volume
+                initVolumeChart(data.volume);
+
+                // Update Doughnut Chart: Category Distribution
+                initCategoryChart(data.distribution);
+
+            } catch (err) {
+                console.error('Stats load error:', err);
+            }
+        }
+
+        function initVolumeChart(volumeData) {
+            const labels = volumeData.map(v => {
+                const d = new Date(v.date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            const counts = volumeData.map(v => v.count);
+
+            const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+            new Chart(volumeCtx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Processed Emails',
+                            data: counts,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99,102,241,0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 2
+                        }
+                    ]
                 },
-                scales: {
-                    x: {
-                        ticks: { color: textColor(), maxTicksLimit: 8, font: { size: 11 } },
-                        grid: { color: gridColor() }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: textColor() } },
+                        tooltip: { backgroundColor: isDark() ? '#0c1230' : '#fff', titleColor: textColor(), bodyColor: textColor() }
                     },
-                    y: {
-                        ticks: { color: textColor(), font: { size: 11 } },
-                        grid: { color: gridColor() },
-                        beginAtZero: true
+                    scales: {
+                        x: { ticks: { color: textColor() }, grid: { color: gridColor() } },
+                        y: { ticks: { color: textColor() }, grid: { color: gridColor() }, beginAtZero: true }
                     }
                 }
-            }
-        });
+            });
+        }
 
-        // ── Doughnut Chart: Category Distribution ──
-        const catLabels = ['Work', 'HR', 'Finance', 'Personal', 'Spam'];
-        const catData   = [3840, 2150, 1980, 1240, 640];
-        const catColors = ['#60a5fa', '#c084fc', '#34d399', '#fbbf24', '#f87171'];
-        const total = catData.reduce((a, b) => a + b, 0);
+        function initCategoryChart(distribution) {
+            const catLabels = distribution.map(d => d.label);
+            const catData   = distribution.map(d => d.value);
+            const catColors = ['#60a5fa', '#c084fc', '#34d399', '#fbbf24', '#f87171'];
+            const total = catData.reduce((a, b) => a + b, 0);
 
-        const catCtx = document.getElementById('categoryChart').getContext('2d');
-        new Chart(catCtx, {
-            type: 'doughnut',
-            data: {
-                labels: catLabels,
-                datasets: [{ data: catData, backgroundColor: catColors, borderColor: isDark() ? '#040714' : '#f1f5f9', borderWidth: 3, hoverOffset: 6 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '68%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: isDark() ? '#0c1230' : '#fff',
-                        borderColor: isDark() ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-                        borderWidth: 1,
-                        titleColor: isDark() ? '#f8fafc' : '#0f172a',
-                        bodyColor: isDark() ? '#94a3b8' : '#475569',
-                        padding: 10, cornerRadius: 8,
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${(ctx.parsed/total*100).toFixed(1)}%)`
+            const catCtx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{ data: catData, backgroundColor: catColors, borderColor: isDark() ? '#040714' : '#f1f5f9', borderWidth: 3 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark() ? '#0c1230' : '#fff',
+                            callbacks: {
+                                label: ctx => ` ${ctx.label}: ${ctx.parsed} (${(ctx.parsed/total*100).toFixed(1)}%)`
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
 
-        // Custom legend
-        const legend = document.getElementById('category-legend');
-        catLabels.forEach((lbl, i) => {
-            const pct = (catData[i] / total * 100).toFixed(1);
-            legend.innerHTML += `
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};flex-shrink:0;"></span>
-                    <span style="font-size:0.85rem;color:var(--text-secondary);flex:1;">${lbl}</span>
-                    <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">${pct}%</span>
-                    <span style="font-size:0.78rem;color:var(--text-muted);">${catData[i].toLocaleString()}</span>
-                </div>`;
-        });
+            const legend = document.getElementById('category-legend');
+            legend.innerHTML = '';
+            catLabels.forEach((lbl, i) => {
+                const pct = (catData[i] / total * 100).toFixed(1);
+                legend.innerHTML += `
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};"></span>
+                        <span style="font-size:0.85rem;color:var(--text-secondary);flex:1;">${lbl}</span>
+                        <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">${pct}%</span>
+                    </div>`;
+            });
+        }
+
+        loadStats();
     });
     </script>
 </body>

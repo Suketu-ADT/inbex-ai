@@ -144,4 +144,87 @@ router.get('/emails', requireAuth, (req, res) => {
     return res.json(formatted);
 });
 
+// ── GET /stats ──
+router.get('/stats', requireAuth, (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // 1. Core Stat Cards
+        const totalProcessed = all('SELECT COUNT(*) as count FROM email_logs WHERE user_id = ?', [userId])[0].count;
+        const avgConfidence = all('SELECT AVG(confidence) as avg FROM email_logs WHERE user_id = ?', [userId])[0].avg || 0;
+        const autoHandled = all('SELECT COUNT(*) as count FROM email_logs WHERE user_id = ? AND (reply_sent = 1 OR workflow_triggered = 1)', [userId])[0].count;
+        
+        // 2. Category Distribution
+        const catRows = all('SELECT predicted_category as label, COUNT(*) as value FROM email_logs WHERE user_id = ? GROUP BY predicted_category', [userId]);
+        
+        // 3. Volume Over Time (Last 30 days)
+        const volumeRows = all(`
+            SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count 
+            FROM email_logs 
+            WHERE user_id = ? AND created_at > date('now', '-30 days')
+            GROUP BY date
+            ORDER BY date ASC
+        `, [userId]);
+
+        // 4. Top Performing Workflow
+        const topWorkflow = all(`
+            SELECT name, run_count 
+            FROM workflows 
+            WHERE user_id = ? 
+            ORDER BY run_count DESC 
+            LIMIT 1
+        `, [userId])[0] || { name: 'None yet', run_count: 0 };
+
+        return res.json({
+            cards: {
+                total_processed: totalProcessed,
+                avg_confidence: Math.round(avgConfidence * 100),
+                auto_handled_pct: totalProcessed > 0 ? Math.round((autoHandled / totalProcessed) * 100) : 0,
+                avg_response_time: "4m 12s" // Mock for now, requires deeper tracking
+            },
+            distribution: catRows,
+            volume: volumeRows,
+            top_workflow: topWorkflow
+        });
+    } catch (err) {
+        console.error('[Stats] Error:', err);
+        return res.status(500).json({ detail: err.message });
+    }
+});
+
+// ── GET /activity ──
+router.get('/activity', requireAuth, (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Fetch recent logs
+        const logs = all(`
+            SELECT 'classification' as type, predicted_category as detail, created_at 
+            FROM email_logs 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        `, [userId]);
+
+        // Fetch recent automation runs
+        const automations = all(`
+            SELECT 'automation' as type, name as detail, last_run_at as created_at 
+            FROM email_automations 
+            WHERE user_id = ? AND last_run_at IS NOT NULL
+            ORDER BY last_run_at DESC 
+            LIMIT 5
+        `, [userId]);
+
+        // Merge and sort
+        const activity = [...logs, ...automations]
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 10);
+
+        return res.json(activity);
+    } catch (err) {
+        console.error('[Activity] Error:', err);
+        return res.status(500).json({ detail: err.message });
+    }
+});
+
 module.exports = router;
