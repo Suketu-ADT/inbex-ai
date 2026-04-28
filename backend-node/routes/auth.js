@@ -122,10 +122,15 @@ router.get('/auth/google', (req, res) => {
 });
 
 // ── GET /auth/google/callback — Handle Google OAuth callback ──
-router.get('/auth/google/callback', async (req, res) => {
-    const { code } = req.query;
+// If `state` is present, this is a Gmail connect callback — pass to gmail router
+router.get('/auth/google/callback', async (req, res, next) => {
+    const { code, state } = req.query;
     if (!code) {
         return res.status(400).send('Missing authorization code.');
+    }
+    // Gmail connect flow passes userId as state — let gmail.js handle it
+    if (state) {
+        return next('router');
     }
 
     try {
