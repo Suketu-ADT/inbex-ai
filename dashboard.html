@@ -193,7 +193,13 @@
             <section class="panel ai-assistant-panel">
                 <header class="panel-header">
                     <h2 class="panel-title">AI Assistant</h2>
-                    <span class="status-dot online" aria-label="AI Online"></span>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <button class="btn btn-primary small" onclick="openComposeModal()" style="font-size:0.75rem;padding:4px 10px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+                            Draft New
+                        </button>
+                        <span class="status-dot online" aria-label="AI Online"></span>
+                    </div>
                 </header>
 
                 <div class="assistant-content">
@@ -270,6 +276,17 @@
                         <span style="color:var(--text-muted);font-size:0.8rem;" id="modal-date"></span>
                     </div>
                     <div id="modal-body" style="font-size:0.9rem;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;max-height:380px;overflow-y:auto;padding:20px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);"></div>
+                    
+                    <!-- Flashcard Summary Area -->
+                    <div id="modal-summary-section" style="margin-top:20px;display:none;">
+                        <label class="section-label" style="margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            AI Flashcard Summary
+                        </label>
+                        <div id="modal-summary-box" style="padding:16px;border-radius:12px;background:linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.08) 100%);border:1px solid rgba(99,102,241,0.2);color:var(--text-primary);font-size:0.88rem;line-height:1.6;position:relative;">
+                            <div id="modal-summary-content">Generating summary...</div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Modal Footer -->
                 <div style="padding:16px 24px;border-top:1px solid var(--border-color);display:flex;gap:10px;justify-content:flex-end;">
@@ -324,27 +341,12 @@
             <section class="panel automation-tasks-panel">
                 <header class="panel-header">
                     <h2 class="panel-title">Automation Tasks</h2>
-                    <button class="btn btn-outline small">Create New Workflow</button>
+                    <button class="btn btn-outline small" onclick="window.location.href='automation.html'">Create New Workflow</button>
                 </header>
-                <div class="tasks-list">
-                    <div class="task-card">
-                        <div class="task-info">
-                            <h4>Daily Summary</h4>
-                            <p>Runs every day at 8:00 AM</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="task-card">
-                        <div class="task-info">
-                            <h4>Bulk Campaign: Q3 Outreach</h4>
-                            <p>Sending 50 emails/day</p>
-                        </div>
-                        <div class="progress-ring-wrap">
-                            <span class="badge badge-info">Active</span>
-                        </div>
+                <div class="tasks-list" id="dashboard-tasks-list">
+                    <!-- Real tasks will be loaded here -->
+                    <div style="text-align:center;padding:32px;color:var(--text-muted);">
+                        <p style="font-size:0.85rem;">Loading automations...</p>
                     </div>
                 </div>
             </section>

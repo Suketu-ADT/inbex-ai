@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboardStats();
     checkGmailStatus();
     loadUserProfile();
+    loadAutomationTasks();
 });
 
 // ── Category colors ──
@@ -424,10 +425,41 @@ function openEmailModal(gmailId) {
 
     document.getElementById('email-modal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+
+    // Generate AI Summary (Flashcard)
+    generateAiSummary(email);
+}
+
+async function generateAiSummary(email) {
+    const section = document.getElementById('modal-summary-section');
+    const content = document.getElementById('modal-summary-content');
+    if (!section || !content) return;
+
+    section.style.display = 'block';
+    content.textContent = 'Generating AI Flashcard...';
+
+    try {
+        const resp = await fetch(`${API_BASE}/generate-summary`, {
+            method: 'POST',
+            headers: window.Auth.getHeaders(),
+            body: JSON.stringify({ text: email.body || email.snippet })
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            content.textContent = data.summary;
+        } else {
+            content.textContent = 'Summary unavailable for this email.';
+        }
+    } catch (err) {
+        content.textContent = 'Connection error. Could not summarize.';
+    }
 }
 
 function closeEmailModal() {
     document.getElementById('email-modal').style.display = 'none';
+    const summarySection = document.getElementById('modal-summary-section');
+    if (summarySection) summarySection.style.display = 'none';
     document.body.style.overflow = '';
     currentModalEmail = null;
 }
@@ -633,6 +665,122 @@ function escapeHtml(str) {
 }
 
 // Expose for inline onclick handlers
+async function loadAutomationTasks() {
+    const list = document.getElementById('dashboard-tasks-list');
+    if (!list) return;
+
+    try {
+        const resp = await fetch(`${API_BASE}/automations`, {
+            headers: window.Auth.getHeaders()
+        });
+        if (!resp.ok) throw new Error('Failed to load');
+
+        const automations = await resp.json();
+        if (automations.length === 0) {
+            list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);"><p style="font-size:0.85rem;">No active workflows. Click "Create New" to start.</p></div>`;
+            return;
+        }
+
+        list.innerHTML = automations.slice(0, 5).map(auto => `
+            <div class="task-card">
+                <div class="task-info">
+                    <h4>${escapeHtml(auto.name)}</h4>
+                    <p>${auto.send_time ? `Runs daily at ${auto.send_time}` : 'Bulk Broadcast'}</p>
+                </div>
+                <div class="progress-ring-wrap">
+                    <span class="badge ${auto.is_active ? 'badge-info' : ''}">${auto.is_active ? 'Active' : 'Paused'}</span>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error('Load tasks error:', err);
+        list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);"><p style="font-size:0.85rem;">Failed to load automations.</p></div>`;
+    }
+}
+
+// AI Compose Logic
+function openComposeModal() {
+    document.getElementById('compose-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeComposeModal() {
+    document.getElementById('compose-modal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+async function generateAiCompose() {
+    const prompt = document.getElementById('compose-prompt').value.trim();
+    if (!prompt) return alert('Please enter what the email should be about.');
+
+    const btn = document.getElementById('compose-generate-btn');
+    const resultArea = document.getElementById('compose-result-area');
+    
+    btn.disabled = true;
+    btn.textContent = 'AI is writing...';
+
+    try {
+        const resp = await fetch(`${API_BASE}/generate-compose`, {
+            method: 'POST',
+            headers: window.Auth.getHeaders(),
+            body: JSON.stringify({ prompt })
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            document.getElementById('compose-subject').value = data.subject;
+            document.getElementById('compose-body').value = data.body;
+            resultArea.style.display = 'flex';
+        } else {
+            alert('Failed to generate content. Please try a different prompt.');
+        }
+    } catch (err) {
+        alert('Server error. Please try again later.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg> Generate with Groq AI`;
+    }
+}
+
+async function sendAiCompose() {
+    const to = document.getElementById('compose-to').value.trim();
+    const subject = document.getElementById('compose-subject').value.trim();
+    const body = document.getElementById('compose-body').value.trim();
+
+    if (!to || !subject || !body) return alert('All fields are required.');
+
+    const btn = document.getElementById('compose-send-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+        const resp = await fetch(`${API_BASE}/gmail/send`, {
+            method: 'POST',
+            headers: window.Auth.getHeaders(),
+            body: JSON.stringify({ to, subject, body })
+        });
+
+        if (resp.ok) {
+            alert('Email sent successfully!');
+            closeComposeModal();
+        } else {
+            const err = await resp.json();
+            alert(`Failed: ${err.detail || 'Unknown error'}`);
+        }
+    } catch (err) {
+        alert('Failed to connect to server.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send via Gmail';
+    }
+}
+
+// Expose functions
+window.openComposeModal = openComposeModal;
+window.closeComposeModal = closeComposeModal;
+window.generateAiCompose = generateAiCompose;
+window.sendAiCompose = sendAiCompose;
+
 window.connectGmail = connectGmail;
 window.disconnectGmail = disconnectGmail;
 window.openClassifyWithEmail = openClassifyWithEmail;

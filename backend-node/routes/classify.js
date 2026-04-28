@@ -88,6 +88,38 @@ router.post('/generate-reply', requireAuth, async (req, res) => {
     }
 });
 
+// ── POST /generate-compose ──
+router.post('/generate-compose', requireAuth, async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        if (!prompt || prompt.trim().length < 5) {
+            return res.status(422).json({ detail: 'Prompt must be at least 5 characters.' });
+        }
+
+        const result = await aiService.generateCompose(prompt);
+        return res.json(result);
+    } catch (err) {
+        console.error('[GenerateCompose] Error:', err);
+        return res.status(500).json({ detail: err.message });
+    }
+});
+
+// ── POST /generate-summary ──
+router.post('/generate-summary', requireAuth, async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text || text.trim().length < 10) {
+            return res.status(422).json({ detail: 'Email text is too short to summarize.' });
+        }
+
+        const summary = await aiService.generateSummary(text);
+        return res.json({ summary });
+    } catch (err) {
+        console.error('[GenerateSummary] Error:', err);
+        return res.status(500).json({ detail: err.message });
+    }
+});
+
 // ── GET /emails ──
 router.get('/emails', requireAuth, (req, res) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);

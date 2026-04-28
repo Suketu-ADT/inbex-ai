@@ -90,10 +90,106 @@ async function generateReply(emailText, category) {
 }
 
 /**
- * Return the rule-based fallback template for a category.
+ * Generate a new email from scratch based on a user prompt.
+ * @param {string} prompt
+ * @returns {Promise<{subject: string, body: string, source: string}>}
  */
-function getFallbackReply(category) {
-    return FALLBACK_TEMPLATES[category] || FALLBACK_TEMPLATES.Work;
+async function generateCompose(prompt) {
+    if (!config.groqApiKey || config.groqApiKey === 'your-groq-api-key-here') {
+        return { 
+            subject: 'Draft from INBEX', 
+            body: 'AI key not set. Please configure your Groq API key.', 
+            source: 'template' 
+        };
+    }
+
+    const payload = {
+        model: config.groqModel,
+        messages: [
+            { 
+                role: 'system', 
+                content: 'You are an expert email assistant. Generate a professional email based on the user request. Output your response as a JSON object with "subject" and "body" keys only. Do not include any other text.' 
+            },
+            { role: 'user', content: prompt },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 500,
+        temperature: 0.7,
+    };
+
+    try {
+        const resp = await fetch(GROQ_API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${config.groqApiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            const contentText = data.choices?.[0]?.message?.content || '{}';
+            const content = JSON.parse(contentText);
+            return {
+                subject: content.subject || 'Draft from INBEX',
+                body: content.body || '',
+                source: 'ai'
+            };
+        }
+    } catch (err) {
+        console.error('[AI Compose] Error:', err);
+    }
+
+    return { 
+        subject: 'Draft from INBEX', 
+        body: 'Failed to generate content. Please try again.', 
+        source: 'template' 
+    };
 }
 
-module.exports = { generateReply, getFallbackReply };
+/**
+ * Generate a concise, flashcard-style summary of an email.
+ * @param {string} emailText
+ * @returns {Promise<string>}
+ */
+async function generateSummary(emailText) {
+    if (!config.groqApiKey || config.groqApiKey === 'your-groq-api-key-here') {
+        return 'AI key not set. Summary unavailable.';
+    }
+
+    const payload = {
+        model: config.groqModel,
+        messages: [
+            { 
+                role: 'system', 
+                content: 'You are an email summarizer. Provide a concise, flashcard-style summary of the following email. Use bullet points for key actions. Keep it under 60 words.' 
+            },
+            { role: 'user', content: `Summarize this email:\n\n${emailText.substring(0, 2000)}` },
+        ],
+        max_tokens: 150,
+        temperature: 0.5,
+    };
+
+    try {
+        const resp = await fetch(GROQ_API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${config.groqApiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            return (data.choices?.[0]?.message?.content || '').trim();
+        }
+    } catch (err) {
+        console.error('[AI Summary] Error:', err);
+    }
+
+    return 'Failed to generate summary.';
+}
+
+module.exports = { generateReply, getFallbackReply, generateCompose, generateSummary };
