@@ -252,51 +252,6 @@
             </section>
         </div>
 
-        <!-- Email Detail Modal Overlay -->
-        <div id="email-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
-            <div id="email-modal-card" style="position:relative;z-index:10;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);max-width:680px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.4),0 0 0 1px var(--border-color);max-height:90vh;display:flex;flex-direction:column;background:var(--bg-surface);">
-                <!-- Modal Header -->
-                <div id="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border-color);">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <span class="badge" id="modal-category-badge" style="font-size:0.78rem;">—</span>
-                        <span style="font-size:0.78rem;color:var(--text-muted);" id="modal-confidence"></span>
-                    </div>
-                    <button onclick="closeEmailModal()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border-color);background:var(--bg-surface-hover);color:var(--text-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" aria-label="Close">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
-                <!-- Modal Body -->
-                <div style="padding:0 24px 24px;overflow-y:auto;">
-                    <h2 id="modal-subject" style="font-size:1.2rem;font-weight:700;margin:16px 0;line-height:1.4;color:var(--text-primary);"></h2>
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:8px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">
-                        <div>
-                            <div style="font-weight:600;font-size:0.92rem;color:var(--text-primary);" id="modal-from"></div>
-                            <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;" id="modal-to"></div>
-                        </div>
-                        <span style="color:var(--text-muted);font-size:0.8rem;" id="modal-date"></span>
-                    </div>
-                    <div id="modal-body" style="font-size:0.9rem;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;max-height:380px;overflow-y:auto;padding:20px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);"></div>
-                    
-                    <!-- Flashcard Summary Area -->
-                    <div id="modal-summary-section" style="margin-top:20px;display:none;">
-                        <label class="section-label" style="margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            AI Flashcard Summary
-                        </label>
-                        <div id="modal-summary-box" style="padding:16px;border-radius:12px;background:linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.08) 100%);border:1px solid rgba(99,102,241,0.2);color:var(--text-primary);font-size:0.88rem;line-height:1.6;position:relative;">
-                            <div id="modal-summary-content">Generating summary...</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Modal Footer -->
-                <div style="padding:16px 24px;border-top:1px solid var(--border-color);display:flex;gap:10px;justify-content:flex-end;">
-                    <button class="btn btn-primary" id="modal-reply-btn" onclick="replyFromModal()" style="display:flex;align-items:center;gap:6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
-                        Reply with AI
-                    </button>
-                    <button class="btn btn-outline" onclick="closeEmailModal()">Close</button>
-                </div>
-            </div>
         </div>
 
         <!-- Bottom Section (2 Columns) -->
@@ -424,6 +379,91 @@
         });
     });
     </script>
+    <!-- Email Detail Modal Overlay -->
+    <div id="email-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+        <div id="email-modal-card" style="position:relative;z-index:10;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);max-width:680px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.4),0 0 0 1px var(--border-color);max-height:90vh;display:flex;flex-direction:column;background:var(--bg-surface);">
+            <!-- Modal Header -->
+            <div id="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border-color);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="badge" id="modal-category-badge" style="font-size:0.78rem;">—</span>
+                    <span style="font-size:0.78rem;color:var(--text-muted);" id="modal-confidence"></span>
+                </div>
+                <button onclick="closeEmailModal()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border-color);background:var(--bg-surface-hover);color:var(--text-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" aria-label="Close">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div style="padding:0 24px 24px;overflow-y:auto;">
+                <h2 id="modal-subject" style="font-size:1.2rem;font-weight:700;margin:16px 0;line-height:1.4;color:var(--text-primary);"></h2>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:8px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">
+                    <div>
+                        <div style="font-weight:600;font-size:0.92rem;color:var(--text-primary);" id="modal-from"></div>
+                        <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;" id="modal-to"></div>
+                    </div>
+                    <span style="color:var(--text-muted);font-size:0.8rem;" id="modal-date"></span>
+                </div>
+                <div id="modal-body" style="font-size:0.9rem;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;max-height:380px;overflow-y:auto;padding:20px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);"></div>
+                
+                <!-- Flashcard Summary Area -->
+                <div id="modal-summary-section" style="margin-top:20px;display:none;">
+                    <label class="section-label" style="margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        AI Flashcard Summary
+                    </label>
+                    <div id="modal-summary-box" style="padding:16px;border-radius:12px;background:linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.08) 100%);border:1px solid rgba(99,102,241,0.2);color:var(--text-primary);font-size:0.88rem;line-height:1.6;position:relative;">
+                        <div id="modal-summary-content">Generating summary...</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal Footer -->
+            <div style="padding:16px 24px;border-top:1px solid var(--border-color);display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn btn-primary" id="modal-reply-btn" onclick="replyFromModal()" style="display:flex;align-items:center;gap:6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                    Reply with AI
+                </button>
+                <button class="btn btn-outline" onclick="closeEmailModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose New Email Modal -->
+    <div id="compose-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+        <div style="position:relative;z-index:10;max-width:600px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.4);display:flex;flex-direction:column;background:var(--bg-surface);border:1px solid var(--border-color);">
+            <div style="padding:16px 24px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;">
+                <h2 style="font-size:1.1rem;font-weight:700;margin:0;color:var(--text-primary);">Draft with AI Assistant</h2>
+                <button onclick="closeComposeModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label class="section-label" style="margin-bottom:8px;display:block;">Recipient Email</label>
+                    <input id="compose-to" class="input-field" type="email" placeholder="client@example.com" style="width:100%;" />
+                </div>
+                <div>
+                    <label class="section-label" style="margin-bottom:8px;display:block;">AI Prompt (What should the email be about?)</label>
+                    <textarea id="compose-prompt" class="input-field" placeholder="Example: Write a formal introduction email to a new potential client named John from ACME Corp..." style="width:100%;min-height:80px;"></textarea>
+                </div>
+                <button class="btn btn-outline" id="compose-generate-btn" onclick="generateAiCompose()" style="width:100%;justify-content:center;gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+                    Generate with Groq AI
+                </button>
+                <hr style="border:none;border-top:1px solid var(--border-color);margin:8px 0;" />
+                <div id="compose-result-area" style="display:none;flex-direction:column;gap:16px;">
+                    <div>
+                        <label class="section-label" style="margin-bottom:8px;display:block;">Generated Subject</label>
+                        <input id="compose-subject" class="input-field" type="text" style="width:100%;" />
+                    </div>
+                    <div>
+                        <label class="section-label" style="margin-bottom:8px;display:block;">Email Body</label>
+                        <textarea id="compose-body" class="input-field" style="width:100%;min-height:200px;"></textarea>
+                    </div>
+                    <div style="display:flex;gap:12px;">
+                        <button class="btn btn-primary" id="compose-send-btn" onclick="sendAiCompose()" style="flex:1;">Send via Gmail</button>
+                        <button class="btn btn-outline" onclick="closeComposeModal()" style="flex:1;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

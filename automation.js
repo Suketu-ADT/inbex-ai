@@ -487,3 +487,38 @@ window.editAutomation = editAutomation;
 window.toggleAutomation = toggleAutomation;
 window.runAutomation = runAutomation;
 window.deleteAutomation = deleteAutomation;
+
+function handleCsvUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        // Basic regex to find emails in the CSV
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+        const foundEmails = text.match(emailRegex);
+
+        if (foundEmails && foundEmails.length > 0) {
+            // Remove duplicates
+            const uniqueEmails = [...new Set(foundEmails)];
+            const recipientInput = document.getElementById('automation-recipient');
+            
+            if (recipientInput.value.trim()) {
+                recipientInput.value += ', ' + uniqueEmails.join(', ');
+            } else {
+                recipientInput.value = uniqueEmails.join(', ');
+            }
+            alert(`Successfully imported ${uniqueEmails.length} emails from CSV.`);
+        } else {
+            alert('No valid email addresses found in the CSV file.');
+        }
+        event.target.value = '';
+    };
+    reader.onerror = function() {
+        alert('Failed to read file.');
+    };
+    reader.readAsText(file);
+}
+
+window.handleCsvUpload = handleCsvUpload;

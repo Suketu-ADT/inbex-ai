@@ -153,9 +153,16 @@
                         </div>
 
                         <div>
-                            <label class="section-label" for="automation-recipient">Recipient Emails</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="section-label" for="automation-recipient">Recipient Emails</label>
+                                <button type="button" class="btn btn-ghost small" onclick="document.getElementById('csv-upload').click()" style="font-size:0.7rem; padding:2px 8px; color:var(--clr-accent-1); display:flex; align-items:center; gap:4px;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+                                    Import CSV
+                                </button>
+                                <input type="file" id="csv-upload" style="display:none;" accept=".csv" onchange="handleCsvUpload(event)" />
+                            </div>
                             <input id="automation-recipient" class="input-field" type="text" placeholder="email1@example.com, email2@example.com" required />
-                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Separate multiple emails with commas.</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Separate multiple emails with commas or upload a CSV.</p>
                         </div>
 
                         <div>
