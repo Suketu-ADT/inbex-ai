@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="INBEX Email Classifier — Paste any email and let AI categorize it and suggest a reply." />
+    <title>Classify Email — INBEX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="classify.css" />
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav" aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="dashboard.html" class="logo-wrap" aria-label="INBEX home">
+                <div class="logo-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="30" rx="9" fill="url(#logoGradC)" />
+                        <path d="M8 8L15 15L8 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M22 8L15 15L22 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="logoGradC" x1="0" y1="0" x2="30" y2="30"
+                                gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1" />
+                                <stop offset="1" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">INBEX</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="classify.html" class="nav-link active">Classify</a>
+                <a href="automation.html" class="nav-link">Automation</a>
+                <a href="reports.html" class="nav-link">Reports</a>
+                <a href="settings.html" class="nav-link">Settings</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+                <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&rounded=true"
+                    alt="User" class="avatar" />
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-container layout-reveal">
+
+        <!-- Page Header -->
+        <header class="welcome-section"
+            style="flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1 class="welcome-title">Email Classifier</h1>
+                <p class="welcome-subtitle">Paste an email · AI classifies it · Get a suggested reply</p>
+            </div>
+            <div class="clf-header-badges" id="clf-stats-bar">
+                <div class="clf-stat-pill">
+                    <span class="clf-stat-num" id="stat-classified">0</span>
+                    <span class="clf-stat-lbl">Classified Today</span>
+                </div>
+                <div class="clf-stat-pill">
+                    <span class="clf-stat-num" id="stat-accuracy">94%</span>
+                    <span class="clf-stat-lbl">Model Accuracy</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Two-Column Grid -->
+        <div class="main-grid">
+
+            <!-- LEFT: Input Panel -->
+            <div style="display:flex; flex-direction:column; gap:var(--sp-6);">
+
+                <!-- Email Input Card -->
+                <section class="panel clf-input-panel" id="input-panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">Email Input</h2>
+                        <div style="display:flex;gap:var(--sp-2);align-items:center;">
+                            <span class="clf-model-badge">
+                                <span class="clf-model-dot"></span>TF-IDF + SVM
+                            </span>
+                            <button class="btn btn-ghost icon-btn" id="clear-btn" aria-label="Clear input" title="Clear">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14H6L5 6"></path>
+                                    <path d="M10 11v6"></path>
+                                    <path d="M14 11v6"></path>
+                                    <path d="M9 6V4h6v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="clf-input-body">
+                        <!-- Quick Sample Buttons -->
+                        <div class="clf-samples">
+                            <span class="clf-samples-label">Quick samples:</span>
+                            <button class="clf-sample-btn" data-sample="hr" id="sample-hr">HR</button>
+                            <button class="clf-sample-btn" data-sample="finance" id="sample-finance">Finance</button>
+                            <button class="clf-sample-btn" data-sample="work" id="sample-work">Work</button>
+                            <button class="clf-sample-btn" data-sample="personal" id="sample-personal">Personal</button>
+                            <button class="clf-sample-btn" data-sample="spam" id="sample-spam">Spam</button>
+                        </div>
+
+                        <!-- Textarea -->
+                        <div class="clf-textarea-wrap">
+                            <textarea
+                                id="email-input"
+                                class="clf-textarea"
+                                placeholder="Paste or type the email text here...
+
+Subject: Q3 Salary Revision
+From: hr@company.com
+
+Dear Employee,
+Please find attached your revised salary structure..."
+                                aria-label="Email text input"
+                                spellcheck="true"
+                            ></textarea>
+                            <div class="clf-char-count" id="char-count">0 characters</div>
+                        </div>
+
+                        <!-- Action Row -->
+                        <div class="clf-actions">
+                            <button class="btn btn-primary clf-classify-btn" id="classify-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span id="classify-btn-text">Classify Email</span>
+                                <span class="clf-spinner" id="clf-spinner" aria-hidden="true"></span>
+                            </button>
+                            <span class="clf-hint">Powered by your FastAPI backend at <code>/predict</code></span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- History Panel (bottom-left) -->
+                <section class="panel" id="history-panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">Recent Classifications</h2>
+                        <button class="btn btn-ghost icon-btn" id="clear-history-btn" aria-label="Clear history"
+                            title="Clear history" style="font-size:var(--text-xs);width:auto;padding:4px 10px;">
+                            Clear
+                        </button>
+                    </header>
+                    <div class="clf-history-list" id="history-list">
+                        <div class="clf-history-empty" id="history-empty">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;">
+                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                <line x1="9" y1="9" x2="15" y2="9"></line>
+                                <line x1="9" y1="13" x2="15" y2="13"></line>
+                                <line x1="9" y1="17" x2="12" y2="17"></line>
+                            </svg>
+                            <p>No classifications yet</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- RIGHT: Result Panel -->
+            <div style="display:flex; flex-direction:column; gap:var(--sp-6);">
+
+                <!-- Classification Result -->
+                <section class="panel clf-result-panel" id="result-panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">AI Classification Result</h2>
+                        <span class="status-dot online" aria-label="Model online"></span>
+                    </header>
+
+                    <!-- Idle State -->
+                    <div class="clf-idle-state" id="idle-state">
+                        <div class="clf-idle-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <p class="clf-idle-title">Awaiting email input</p>
+                        <p class="clf-idle-sub">Paste an email on the left and click <strong>Classify Email</strong></p>
+                    </div>
+
+                    <!-- Result State (hidden until result) -->
+                    <div class="clf-result-body" id="result-body" hidden>
+                        <!-- Category Badge -->
+                        <div class="clf-category-display" id="category-display">
+                            <div class="clf-category-icon" id="category-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="clf-cat-label">Classified as</div>
+                                <div class="clf-cat-value" id="cat-value">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Confidence Bar -->
+                        <div class="clf-confidence-wrap">
+                            <div class="clf-conf-row">
+                                <span class="clf-conf-label">Model Confidence</span>
+                                <span class="clf-conf-pct" id="conf-pct">—</span>
+                            </div>
+                            <div class="clf-conf-bar-bg">
+                                <div class="clf-conf-bar-fill" id="conf-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- All Category Scores -->
+                        <div class="clf-scores-wrap">
+                            <div class="clf-scores-title">Category Scores</div>
+                            <div class="clf-scores-grid" id="scores-grid">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="clf-result-actions">
+                            <button class="btn btn-primary" id="use-reply-btn" style="flex:1;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 17 4 12 9 7"></polyline>
+                                    <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                                </svg>
+                                Use Suggested Reply
+                            </button>
+                            <button class="btn btn-outline" id="create-workflow-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Add Workflow Rule
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI Reply Panel -->
+                <section class="panel clf-reply-panel" id="reply-panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">Suggested Reply</h2>
+                        <div style="display:flex;gap:var(--sp-2);align-items:center;">
+                            <span class="clf-model-badge" style="background:rgba(16,185,129,0.1);color:var(--clr-success);">
+                                ✨ AI Draft
+                            </span>
+                            <button class="btn btn-ghost icon-btn" id="regen-btn" aria-label="Regenerate reply"
+                                title="Regenerate" hidden>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </header>
+
+                    <!-- Idle reply state -->
+                    <div class="clf-reply-idle" id="reply-idle">
+                        <p>Reply suggestion will appear here after classification.</p>
+                    </div>
+
+                    <!-- Active reply state -->
+                    <div class="clf-reply-body" id="reply-body" hidden>
+                        <textarea
+                            class="clf-reply-textarea"
+                            id="reply-textarea"
+                            aria-label="AI suggested reply (editable)"
+                            placeholder="Suggested reply will appear here..."
+                        ></textarea>
+                        <div class="clf-reply-footer">
+                            <div class="confidence-indicator-flex" style="gap:var(--sp-3);">
+                                <span class="confidence-indicator">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    Rule-based template
+                                </span>
+                                <span class="clf-reply-hint" id="reply-category-hint"></span>
+                            </div>
+                            <div style="display:flex;gap:var(--sp-2);">
+                                <button class="btn btn-primary small" id="send-reply-btn">Send Now</button>
+                                <button class="btn btn-outline small" id="copy-reply-btn">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="clf-toast" id="toast" role="alert" aria-live="polite"></div>
+
+    <script src="dashboard.js"></script>
+    <script src="classify.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="INBEX AI SaaS Dashboard" />
+    <title>Dashboard — INBEX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="auth.js"></script>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav" aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="#" class="logo-wrap" aria-label="INBEX home">
+                <div class="logo-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="30" rx="9" fill="url(#logoGradD)" />
+                        <path d="M8 8L15 15L8 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M22 8L15 15L22 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="logoGradD" x1="0" y1="0" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1" />
+                                <stop offset="1" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">INBEX</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="classify.html" class="nav-link">Classify</a>
+                <a href="automation.html" class="nav-link">Automation</a>
+                <a href="reports.html" class="nav-link">Reports</a>
+                <a href="settings.html" class="nav-link">Settings</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+                <!-- Sun Icon for Light Mode (hidden in dark mode) -->
+                <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Moon Icon for Dark Mode (hidden in light mode) -->
+                <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <div class="user-profile" style="position:relative;">
+                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&rounded=true"
+                    alt="User" class="avatar" style="cursor:pointer;" onclick="toggleProfileMenu()" />
+                <div id="profile-dropdown" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:220px;border-radius:12px;overflow:hidden;z-index:999;box-shadow:0 12px 40px rgba(0,0,0,0.25),0 0 0 1px var(--border-color);background:var(--bg-surface);">
+                    <div style="padding:14px 16px;border-bottom:1px solid var(--border-color);">
+                        <p id="dropdown-name" style="font-weight:600;font-size:0.88rem;margin:0;color:var(--text-primary);"></p>
+                        <p id="dropdown-email" style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;"></p>
+                    </div>
+                    <a href="settings.html" style="display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:0.83rem;text-decoration:none;color:var(--text-primary);transition:background 0.15s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                        Settings
+                    </a>
+                    <button onclick="signOutFromDashboard()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;font-size:0.83rem;border:none;background:transparent;color:#ef4444;cursor:pointer;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.background='transparent'">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout Container -->
+    <main class="dashboard-container layout-reveal">
+
+        <!-- Welcome Section -->
+        <header class="welcome-section" style="flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div>
+                <h1 class="welcome-title">Welcome back, Alex</h1>
+                <p class="welcome-subtitle">Your Autonomous Email Control Center</p>
+            </div>
+            <div id="gmail-status-section" style="display:flex;align-items:center;gap:10px;">
+                <span id="gmail-badge" class="badge" style="display:none;background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.25);font-size:0.78rem;padding:6px 14px;border-radius:20px;">connected@gmail.com</span>
+                <button id="gmail-connect-btn" onclick="connectGmail()" class="btn btn-primary" style="padding:10px 20px;font-size:0.85rem;border-radius:10px;display:inline-flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    Connect Gmail
+                </button>
+                <button id="gmail-disconnect-btn" onclick="disconnectGmail()" class="btn btn-ghost" style="display:none;padding:8px 16px;font-size:0.8rem;color:#f87171;" title="Disconnect Gmail">
+                    Disconnect
+                </button>
+            </div>
+        </header>
+
+        <!-- Intelligence Overview Cards -->
+        <section class="overview-grid">
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">Total Emails Processed</p>
+                    <h3 class="stat-value" id="stat-total">0</h3>
+                    <div class="trend-indicator up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +8.2% vs last month
+                    </div>
+                </div>
+                <div class="stat-indicator gradient-bar"></div>
+            </article>
+            <article class="stat-card" id="stat-card-urgent" style="cursor:pointer;" onclick="filterUrgentEmails()" title="Click to filter urgent/unread emails">
+                <div class="stat-content">
+                    <p class="stat-label">Urgent Emails</p>
+                    <h3 class="stat-value" id="stat-urgent">0</h3>
+                    <div class="trend-indicator up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +3 today
+                    </div>
+                </div>
+                <div class="stat-indicator pulse-danger"></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">Automated Today</p>
+                    <h3 class="stat-value" id="stat-automated">0</h3>
+                    <div class="trend-indicator up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +12% this week
+                    </div>
+                </div>
+                <div class="stat-indicator gradient-bar"></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">Pending Decisions</p>
+                    <h3 class="stat-value" id="stat-pending">0</h3>
+                    <div class="trend-indicator neutral">
+                        <span>— on par</span>
+                    </div>
+                </div>
+                <div class="stat-indicator"></div>
+            </article>
+        </section>
+
+        <!-- Main Grid Layout (70/30) -->
+        <div class="main-grid">
+
+            <!-- LEFT (70%): Priority Inbox -->
+            <section class="panel priority-inbox-panel">
+                <header class="panel-header">
+                    <h2 class="panel-title">Priority Inbox</h2>
+                    <div class="filter-tabs">
+                        <button class="tab active">All</button>
+                        <button class="tab">Work</button>
+                        <button class="tab">HR</button>
+                        <button class="tab">Finance</button>
+                        <button class="tab">Personal</button>
+                    </div>
+                </header>
+
+                <div class="email-list" id="email-list">
+                    <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;margin-bottom:12px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <p>Connect your Gmail to see real emails here</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT (30%): AI Assistant Panel -->
+            <section class="panel ai-assistant-panel">
+                <header class="panel-header">
+                    <h2 class="panel-title">AI Assistant</h2>
+                    <span class="status-dot online" aria-label="AI Online"></span>
+                </header>
+
+                <div class="assistant-content">
+                    <!-- Email Selector -->
+                    <div style="margin-bottom:16px;">
+                        <label class="section-label" style="margin-bottom:8px;display:block;">Reply to:</label>
+                        <select id="ai-email-select" onchange="onEmailSelected()" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-primary);font-size:0.85rem;font-family:inherit;cursor:pointer;">
+                            <option value="">— Select an email to reply —</option>
+                        </select>
+                    </div>
+
+                    <!-- Draft Preview (populated dynamically) -->
+                    <div class="draft-preview" id="ai-draft-section" style="display:none;">
+                        <label class="section-label" id="ai-reply-label">Suggested Reply</label>
+                        <div class="draft-box" id="ai-draft-box" style="position:relative;">
+                            <textarea id="ai-reply-text" style="width:100%;min-height:120px;border:none;background:transparent;color:var(--text-primary);font-family:inherit;font-size:0.88rem;line-height:1.6;resize:vertical;outline:none;"></textarea>
+                        </div>
+                        <div class="confidence-indicator-flex" id="ai-confidence-row" style="display:none;">
+                            <span class="confidence-indicator">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span id="ai-source-label">AI Generated</span>
+                            </span>
+                        </div>
+                        <div class="draft-actions">
+                            <button class="btn btn-primary" style="flex:1;" id="ai-send-btn" onclick="sendAiReply()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                Send via Gmail
+                            </button>
+                            <button class="btn btn-outline" onclick="generateAiReply()" id="ai-regen-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                                Regenerate
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Idle state (no email selected) -->
+                    <div id="ai-idle-state" style="text-align:center;padding:24px 0;color:var(--text-muted);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:0.3;margin-bottom:8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <p style="font-size:0.85rem;">Select an email above to generate an AI reply</p>
+                    </div>
+
+                    <!-- Decision Log (dynamic) -->
+                    <div class="decision-log">
+                        <label class="section-label">Agent Decision Log</label>
+                        <ul class="log-list" id="ai-decision-log">
+                            <li class="log-item"><span class="log-time">—</span><span class="log-desc">Waiting for actions...</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Email Detail Modal Overlay -->
+        <div id="email-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+            <div id="email-modal-card" style="max-width:680px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.4),0 0 0 1px var(--border-color);max-height:90vh;display:flex;flex-direction:column;background:var(--bg-surface);">
+                <!-- Modal Header -->
+                <div id="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border-color);">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="badge" id="modal-category-badge" style="font-size:0.78rem;">—</span>
+                        <span style="font-size:0.78rem;color:var(--text-muted);" id="modal-confidence"></span>
+                    </div>
+                    <button onclick="closeEmailModal()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border-color);background:var(--bg-surface-hover);color:var(--text-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" aria-label="Close">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <!-- Modal Body -->
+                <div style="padding:0 24px 24px;overflow-y:auto;">
+                    <h2 id="modal-subject" style="font-size:1.2rem;font-weight:700;margin:16px 0;line-height:1.4;color:var(--text-primary);"></h2>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:8px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">
+                        <div>
+                            <div style="font-weight:600;font-size:0.92rem;color:var(--text-primary);" id="modal-from"></div>
+                            <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;" id="modal-to"></div>
+                        </div>
+                        <span style="color:var(--text-muted);font-size:0.8rem;" id="modal-date"></span>
+                    </div>
+                    <div id="modal-body" style="font-size:0.9rem;line-height:1.75;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;max-height:380px;overflow-y:auto;padding:20px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);"></div>
+                </div>
+                <!-- Modal Footer -->
+                <div style="padding:16px 24px;border-top:1px solid var(--border-color);display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="btn btn-primary" id="modal-reply-btn" onclick="replyFromModal()" style="display:flex;align-items:center;gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+                        Reply with AI
+                    </button>
+                    <button class="btn btn-outline" onclick="closeEmailModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section (2 Columns) -->
+        <div class="bottom-grid">
+
+            <!-- LEFT: Recent Activity -->
+            <section class="panel recent-activity-panel">
+                <header class="panel-header">
+                    <h2 class="panel-title">Recent Activity</h2>
+                </header>
+                <div class="activity-feed">
+                    <div class="activity-item">
+                        <div class="activity-icon bg-success">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="activity-text">
+                            <strong>Support Workflow</strong> successfully responded to 45 tickets.
+                        </div>
+                        <span class="activity-time">2h ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon bg-info">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22 6 12 13 2 6"></polyline>
+                            </svg>
+                        </div>
+                        <div class="activity-text">
+                            <strong>Sales Sequence A</strong> triggered for 12 new leads.
+                        </div>
+                        <span class="activity-time">4h ago</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT: Automation Tasks -->
+            <section class="panel automation-tasks-panel">
+                <header class="panel-header">
+                    <h2 class="panel-title">Automation Tasks</h2>
+                    <button class="btn btn-outline small">Create New Workflow</button>
+                </header>
+                <div class="tasks-list">
+                    <div class="task-card">
+                        <div class="task-info">
+                            <h4>Daily Summary</h4>
+                            <p>Runs every day at 8:00 AM</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="task-card">
+                        <div class="task-info">
+                            <h4>Bulk Campaign: Q3 Outreach</h4>
+                            <p>Sending 50 emails/day</p>
+                        </div>
+                        <div class="progress-ring-wrap">
+                            <span class="badge badge-info">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Category Distribution Mini Chart -->
+        <section class="panel" style="overflow:visible;">
+            <header class="panel-header">
+                <h2 class="panel-title">Category Distribution</h2>
+                <a href="reports.html" class="btn btn-ghost" style="font-size:var(--text-xs);padding:4px 10px;">Full Report →</a>
+            </header>
+            <div style="display:flex;align-items:center;gap:var(--sp-8);padding:var(--sp-5);flex-wrap:wrap;">
+                <div style="position:relative;width:180px;height:180px;flex-shrink:0;margin:0 auto;">
+                    <canvas id="dashCatChart" aria-label="Category distribution mini chart"></canvas>
+                </div>
+                <div id="dash-cat-legend" style="display:flex;flex-direction:column;gap:var(--sp-3);flex:1;min-width:160px;"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="dashboard.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+        const catLabels = ['Work', 'HR', 'Finance', 'Personal', 'Spam'];
+        const catData   = [3840, 2150, 1980, 1240, 640];
+        const catColors = ['#60a5fa', '#c084fc', '#34d399', '#fbbf24', '#f87171'];
+        const total = catData.reduce((a,b) => a+b, 0);
+
+        // Update total stat
+        const statTotal = document.getElementById('stat-total');
+        if (statTotal) {
+            const classified = parseInt(localStorage.getItem('inbex-classified-today') || '0');
+            if (classified > 0) statTotal.textContent = (9850 + classified).toLocaleString();
+        }
+
+        const ctx = document.getElementById('dashCatChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{ data: catData, backgroundColor: catColors, borderColor: isDark() ? '#040714' : '#f1f5f9', borderWidth: 3, hoverOffset: 6 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: isDark() ? '#0c1230' : '#fff',
+                        borderColor: isDark() ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+                        borderWidth: 1,
+                        titleColor: isDark() ? '#f8fafc' : '#0f172a',
+                        bodyColor: isDark() ? '#94a3b8' : '#475569',
+                        padding: 10, cornerRadius: 8,
+                        callbacks: { label: c => ` ${c.label}: ${(c.parsed/total*100).toFixed(1)}%` }
+                    }
+                }
+            }
+        });
+
+        const legend = document.getElementById('dash-cat-legend');
+        catLabels.forEach((lbl, i) => {
+            const pct = (catData[i]/total*100).toFixed(1);
+            legend.innerHTML += `
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};flex-shrink:0;"></span>
+                    <span style="font-size:0.85rem;color:var(--text-secondary);flex:1;">${lbl}</span>
+                    <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">${pct}%</span>
+                    <span style="font-size:0.78rem;color:var(--text-muted);">${catData[i].toLocaleString()}</span>
+                </div>`;
+        });
+    });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="INBEX AI SaaS Dashboard - Reports" />
+    <title>Reports & Insights — INBEX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav" aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="dashboard.html" class="logo-wrap" aria-label="INBEX home">
+                <div class="logo-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="30" rx="9" fill="url(#logoGradD)" />
+                        <path d="M8 8L15 15L8 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M22 8L15 15L22 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="logoGradD" x1="0" y1="0" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1" />
+                                <stop offset="1" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">INBEX</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="classify.html" class="nav-link">Classify</a>
+                <a href="automation.html" class="nav-link">Automation</a>
+                <a href="reports.html" class="nav-link active">Reports</a>
+                <a href="settings.html" class="nav-link">Settings</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+                <!-- Sun Icon for Light Mode (hidden in dark mode) -->
+                <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Moon Icon for Dark Mode (hidden in light mode) -->
+                <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Alex+Johnson&background=6366f1&color=fff&rounded=true"
+                    alt="Alex Johnson" class="avatar" />
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout Container -->
+    <main class="dashboard-container layout-reveal">
+
+        <!-- Header -->
+        <header class="welcome-section"
+            style="flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1 class="welcome-title">Reports & Insights</h1>
+                <p class="welcome-subtitle">Analyze AI performance and team efficiency</p>
+            </div>
+            <div>
+                <select class="form-select" style="width: auto; display: inline-block; padding-right: 32px;"
+                    aria-label="Date Range">
+                    <option value="last7">Last 7 Days</option>
+                    <option value="last30" selected>Last 30 Days</option>
+                    <option value="thisQuarter">This Quarter</option>
+                    <option value="yearToDate">Year to Date</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Overview Cards -->
+        <section class="overview-grid">
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">Emails Processed</p>
+                    <h3 class="stat-value">12.4k</h3>
+                    <div class="trend-indicator up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +8.2% vs last month
+                    </div>
+                </div>
+                <div class="stat-indicator gradient-bar"></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">Automation Success Rate</p>
+                    <h3 class="stat-value">94.2%</h3>
+                    <div class="trend-indicator up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +2.4% vs last month
+                    </div>
+                </div>
+                <div class="stat-indicator pulse-warn"
+                    style="background: var(--clr-success); box-shadow: 0 0 10px var(--clr-success);"></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">Avg Response Time</p>
+                    <h3 class="stat-value">4m 12s</h3>
+                    <div class="trend-indicator up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        -1m 45s vs last month
+                    </div>
+                </div>
+                <div class="stat-indicator" style="background: var(--clr-info);"></div>
+            </article>
+            <article class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-label">AI Confidence Avg</p>
+                    <h3 class="stat-value">91%</h3>
+                    <div class="trend-indicator neutral">
+                        <span>— steady</span>
+                    </div>
+                </div>
+                <div class="stat-indicator" style="background: var(--clr-accent-2);"></div>
+            </article>
+        </section>
+
+        <!-- Main Grid Layout (70/30) -->
+        <div class="main-grid">
+            <!-- LEFT (70%): Charts Section -->
+            <div style="display: flex; flex-direction: column; gap: var(--sp-6);">
+                <section class="panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">Email Volume Over Time</h2>
+                        <button class="btn btn-ghost icon-btn" aria-label="Export" title="Export CSV">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                    </header>
+                    <div style="padding: var(--sp-5); position: relative; height: 280px;">
+                        <canvas id="volumeChart" aria-label="Email volume over time line chart"></canvas>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <header class="panel-header">
+                        <h2 class="panel-title">Category Distribution</h2>
+                        <span class="badge badge-ai">ML Model Output</span>
+                    </header>
+                    <div style="display: flex; align-items: center; gap: var(--sp-6); padding: var(--sp-5); flex-wrap: wrap;">
+                        <div style="position: relative; width: 220px; height: 220px; flex-shrink: 0; margin: 0 auto;">
+                            <canvas id="categoryChart" aria-label="Email category distribution doughnut chart"></canvas>
+                        </div>
+                        <div id="category-legend" style="display: flex; flex-direction: column; gap: var(--sp-3); flex: 1; min-width: 160px;"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- RIGHT (30%): Efficiency Panel -->
+            <section class="panel" style="align-self: start;">
+                <header class="panel-header">
+                    <h2 class="panel-title">Automation Efficiency</h2>
+                </header>
+
+                <div class="efficiency-list">
+                    <!-- Ratio 1 -->
+                    <div style="margin-bottom: var(--sp-4);">
+                        <div class="efficiency-item">
+                            <span>Auto-handled</span>
+                            <span style="font-weight: 600; color: var(--clr-success);">78%</span>
+                        </div>
+                        <div class="efficiency-bar-container">
+                            <div class="efficiency-bar" style="width: 78%; background: var(--clr-success);"></div>
+                        </div>
+                        <p style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 4px;">Emails
+                            correctly resolved by AI.</p>
+                    </div>
+
+                    <!-- Ratio 2 -->
+                    <div style="margin-bottom: var(--sp-4);">
+                        <div class="efficiency-item">
+                            <span>Manual Review</span>
+                            <span style="font-weight: 600; color: var(--clr-warn);">22%</span>
+                        </div>
+                        <div class="efficiency-bar-container">
+                            <div class="efficiency-bar" style="width: 22%; background: var(--clr-warn);"></div>
+                        </div>
+                        <p style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 4px;">Emails
+                            requiring user intervention.</p>
+                    </div>
+
+                    <!-- Top Workflow -->
+                    <div
+                        style="margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border-color);">
+                        <span class="section-label">Top Performing Workflow</span>
+                        <div class="draft-box" style="margin-top: var(--sp-2);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <h4 style="font-weight: 600; font-size: var(--text-sm);">Support Ticketing</h4>
+                                <span class="badge badge-success"
+                                    style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Active</span>
+                            </div>
+                            <p style="font-size: var(--text-xs); color: var(--text-secondary);">Processed 4.2k tickets
+                                this week.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="dashboard.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+        const gridColor = () => isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        const textColor = () => isDark() ? '#94a3b8' : '#64748b';
+
+        // ── Line Chart: Email Volume ──
+        const labels = [];
+        const today = new Date();
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(today); d.setDate(d.getDate() - i);
+            labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        }
+        const sent     = Array.from({length:30}, () => Math.floor(300 + Math.random()*250));
+        const received = Array.from({length:30}, () => Math.floor(250 + Math.random()*200));
+        const bounced  = Array.from({length:30}, () => Math.floor(5  + Math.random()*20));
+
+        const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+        new Chart(volumeCtx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Sent',
+                        data: sent,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99,102,241,0.12)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Received',
+                        data: received,
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168,85,247,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Bounced',
+                        data: bounced,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239,68,68,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 1.5,
+                        borderDash: [4,3]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: textColor(), boxWidth: 12, padding: 16, font: { family: 'Inter', size: 12 } }
+                    },
+                    tooltip: {
+                        backgroundColor: isDark() ? '#0c1230' : '#fff',
+                        borderColor: isDark() ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+                        borderWidth: 1,
+                        titleColor: isDark() ? '#f8fafc' : '#0f172a',
+                        bodyColor: isDark() ? '#94a3b8' : '#475569',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: textColor(), maxTicksLimit: 8, font: { size: 11 } },
+                        grid: { color: gridColor() }
+                    },
+                    y: {
+                        ticks: { color: textColor(), font: { size: 11 } },
+                        grid: { color: gridColor() },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // ── Doughnut Chart: Category Distribution ──
+        const catLabels = ['Work', 'HR', 'Finance', 'Personal', 'Spam'];
+        const catData   = [3840, 2150, 1980, 1240, 640];
+        const catColors = ['#60a5fa', '#c084fc', '#34d399', '#fbbf24', '#f87171'];
+        const total = catData.reduce((a, b) => a + b, 0);
+
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{ data: catData, backgroundColor: catColors, borderColor: isDark() ? '#040714' : '#f1f5f9', borderWidth: 3, hoverOffset: 6 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: isDark() ? '#0c1230' : '#fff',
+                        borderColor: isDark() ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+                        borderWidth: 1,
+                        titleColor: isDark() ? '#f8fafc' : '#0f172a',
+                        bodyColor: isDark() ? '#94a3b8' : '#475569',
+                        padding: 10, cornerRadius: 8,
+                        callbacks: {
+                            label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${(ctx.parsed/total*100).toFixed(1)}%)`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Custom legend
+        const legend = document.getElementById('category-legend');
+        catLabels.forEach((lbl, i) => {
+            const pct = (catData[i] / total * 100).toFixed(1);
+            legend.innerHTML += `
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};flex-shrink:0;"></span>
+                    <span style="font-size:0.85rem;color:var(--text-secondary);flex:1;">${lbl}</span>
+                    <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">${pct}%</span>
+                    <span style="font-size:0.78rem;color:var(--text-muted);">${catData[i].toLocaleString()}</span>
+                </div>`;
+        });
+    });
+    </script>
+</body>
+
+</html>

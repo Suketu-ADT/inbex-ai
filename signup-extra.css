@@ -1,0 +1,16 @@
+/* ── Signup-page supplemental styles ── */
+
+/* Terms note below CTA */
+.terms-note {
+    font-size: var(--type-xs);
+    color: var(--clr-n-500);
+    text-align: center;
+    line-height: var(--lh-relaxed);
+    letter-spacing: var(--ls-wide);
+    margin-top: calc(var(--sp-2) * -1);
+    animation: fadeUp var(--t-slow) var(--ease-out) 0.50s both;
+}
+
+.terms-note .helper-link {
+    font-weight: var(--fw-medium);
+}

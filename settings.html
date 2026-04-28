@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="INBEX AI SaaS Dashboard - Settings" />
+    <title>Settings — INBEX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <script src="auth.js"></script>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav" aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="dashboard.html" class="logo-wrap" aria-label="INBEX home">
+                <div class="logo-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="30" rx="9" fill="url(#logoGradD)" />
+                        <path d="M8 8L15 15L8 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M22 8L15 15L22 22" stroke="white" stroke-width="2.4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="logoGradD" x1="0" y1="0" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1" />
+                                <stop offset="1" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">INBEX</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="classify.html" class="nav-link">Classify</a>
+                <a href="automation.html" class="nav-link">Automation</a>
+                <a href="reports.html" class="nav-link">Reports</a>
+                <a href="settings.html" class="nav-link active">Settings</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+                <!-- Sun Icon for Light Mode (hidden in dark mode) -->
+                <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Moon Icon for Dark Mode (hidden in light mode) -->
+                <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <div class="user-profile">
+                <img id="settings-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&rounded=true"
+                    alt="User" class="avatar" />
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout Container -->
+    <main class="dashboard-container layout-reveal">
+
+        <!-- Header -->
+        <header class="welcome-section">
+            <h1 class="welcome-title">Settings</h1>
+            <p class="welcome-subtitle">Manage your account and preferences</p>
+        </header>
+
+        <div class="settings-grid">
+
+            <!-- Sidebar Navigation -->
+            <aside>
+                <nav class="settings-nav">
+                    <a href="#profile" class="settings-nav-item active">Profile</a>
+                    <a href="#appearance" class="settings-nav-item">Appearance</a>
+                    <a href="#automation" class="settings-nav-item">Automation</a>
+                    <a href="#notifications" class="settings-nav-item">Notifications</a>
+                    <a href="#integrations" class="settings-nav-item">Integrations</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="settings-content">
+
+                <!-- Profile Settings -->
+                <section id="profile" class="settings-section">
+                    <div class="settings-section-header">
+                        <h2 class="settings-section-title">Profile Settings</h2>
+                        <p class="settings-section-subtitle">Update your personal information</p>
+                    </div>
+
+                    <div style="display: flex; gap: var(--sp-6); align-items: start; flex-wrap: wrap;">
+                        <img id="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=80&rounded=true"
+                            alt="Profile" style="border-radius: 50%; box-shadow: var(--shadow-soft);">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="profile-name" class="form-input" value="" placeholder="Your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="profile-email" class="form-input" value="" placeholder="Your email" readonly style="opacity:0.7;cursor:not-allowed;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Member Since</label>
+                        <input type="text" id="profile-joined" class="form-input" value="" readonly style="opacity:0.7;cursor:not-allowed;">
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--sp-4); flex-wrap: wrap; gap: var(--sp-3);">
+                        <button class="btn btn-outline" onclick="logoutUser()" style="color:var(--clr-danger);border-color:var(--clr-danger);">Sign Out</button>
+                        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+                    </div>
+                </section>
+
+                <!-- Appearance Settings -->
+                <section id="appearance" class="settings-section">
+                    <div class="settings-section-header">
+                        <h2 class="settings-section-title">Appearance</h2>
+                        <p class="settings-section-subtitle">Customize the interface</p>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <h4>Dark Theme</h4>
+                            <p>Toggle dark or light mode for the dashboard</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="settings-theme-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <h4>Auto-detect System Preference</h4>
+                            <p>Automatically switch themes based on OS settings</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Automation Preferences -->
+                <section id="automation" class="settings-section">
+                    <div class="settings-section-header">
+                        <h2 class="settings-section-title">Automation Preferences</h2>
+                        <p class="settings-section-subtitle">Configure global AI behavior</p>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <h4>Auto-send Replies</h4>
+                            <p>Allow AI to send high-confidence replies automatically</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-auto-send">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <h4>Require Approval for Finance</h4>
+                            <p>Always hold finance-related emails in pending state</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-finance-approval" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-row"
+                        style="flex-direction: column; align-items: flex-start; gap: var(--sp-2);">
+                        <div class="settings-row-info">
+                            <h4>Urgency Threshold</h4>
+                            <p>Minimum AI confidence required to tag an email as Urgent</p>
+                        </div>
+                        <select id="pref-urgency-threshold" class="form-select" style="max-width: 200px;">
+                            <option value="95">Very High (95%)</option>
+                            <option value="90" selected>High (90%)</option>
+                            <option value="80">Medium (80%)</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Notification Preferences -->
+                <section id="notifications" class="settings-section">
+                    <div class="settings-section-header">
+                        <h2 class="settings-section-title">Notifications</h2>
+                        <p class="settings-section-subtitle">How you want to be alerted</p>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <h4>Email Digest</h4>
+                            <p>Receive a daily summary of automated tasks</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-email-digest" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <h4>In-app Notifications</h4>
+                            <p>Show pop-up alerts for urgent emails requiring review</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-inapp-notif" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Integrations -->
+                <section id="integrations" class="settings-section">
+                    <div class="settings-section-header">
+                        <h2 class="settings-section-title">Integrations</h2>
+                        <p class="settings-section-subtitle">Connect your Google account for Gmail & Calendar</p>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <div style="display: flex; align-items: center; gap: var(--sp-2);">
+                                <svg width="20" height="20" viewBox="0 0 20 20"><path fill="#4285F4" d="M19.6 10.23c0-.68-.06-1.34-.17-1.97H10v3.73h5.4a4.63 4.63 0 01-2 3.04v2.52h3.24c1.9-1.75 3-4.33 3-7.32z"/><path fill="#34A853" d="M10 20c2.7 0 4.96-.9 6.61-2.45l-3.24-2.52c-.9.6-2.05.96-3.37.96-2.59 0-4.78-1.75-5.56-4.1H1.1v2.6A10 10 0 0010 20z"/><path fill="#FBBC05" d="M4.44 11.89A5.97 5.97 0 014.13 10c0-.65.11-1.29.31-1.89V5.51H1.1A10 10 0 000 10c0 1.61.38 3.14 1.1 4.49l3.34-2.6z"/><path fill="#EA4335" d="M10 3.96c1.46 0 2.77.5 3.8 1.49l2.85-2.85C14.95.99 12.7 0 10 0A10 10 0 001.1 5.51l3.34 2.6C5.22 5.71 7.41 3.96 10 3.96z"/></svg>
+                                <h4>Gmail & Google Calendar</h4>
+                                <span id="gmail-int-badge" class="badge" style="display:none;"></span>
+                            </div>
+                            <p id="gmail-int-desc">Connect your Gmail to read, classify, and reply to emails. Calendar events auto-sync.</p>
+                        </div>
+                        <div id="gmail-int-actions">
+                            <button id="gmail-int-connect" class="btn btn-primary small" onclick="connectGmailSettings()" style="display:none;">Connect Gmail</button>
+                            <button id="gmail-int-disconnect" class="btn btn-outline small" onclick="disconnectGmailSettings()" style="display:none;color:var(--clr-danger);border-color:var(--clr-danger);">Disconnect</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info">
+                            <div style="display: flex; align-items: center; gap: var(--sp-2);">
+                                <h4>Groq AI</h4>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Active</span>
+                            </div>
+                            <p>Powered by Llama 3.3 70B — used for email classification, reply generation, and meeting extraction</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:3000';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auth check
+            if (window.Auth && !window.Auth.isAuthenticated()) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Theme
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const htmlEl = document.documentElement;
+            const saved = localStorage.getItem('inbex-theme') || 'dark';
+            htmlEl.setAttribute('data-theme', saved);
+            themeToggleBtn.addEventListener('click', () => {
+                const cur = htmlEl.getAttribute('data-theme');
+                const next = cur === 'dark' ? 'light' : 'dark';
+                htmlEl.setAttribute('data-theme', next);
+                localStorage.setItem('inbex-theme', next);
+            });
+
+            // Load user profile
+            const user = window.Auth ? window.Auth.getUser() : null;
+            if (user) {
+                const name = user.name || user.email || 'User';
+                const enc = encodeURIComponent(name);
+                document.getElementById('settings-avatar').src = `https://ui-avatars.com/api/?name=${enc}&background=6366f1&color=fff&rounded=true`;
+                document.getElementById('profile-avatar').src = `https://ui-avatars.com/api/?name=${enc}&background=6366f1&color=fff&size=80&rounded=true`;
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-email').value = user.email || '';
+                if (user.created_at) {
+                    document.getElementById('profile-joined').value = new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                }
+            }
+
+            // Settings nav
+            const navItems = document.querySelectorAll('.settings-nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    navItems.forEach(n => n.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                });
+            });
+
+            // Theme toggle sync in settings
+            const settingsThemeToggle = document.getElementById('settings-theme-toggle');
+            if (settingsThemeToggle) {
+                settingsThemeToggle.checked = htmlEl.getAttribute('data-theme') === 'dark';
+                settingsThemeToggle.addEventListener('change', () => themeToggleBtn.click());
+                new MutationObserver(() => {
+                    settingsThemeToggle.checked = htmlEl.getAttribute('data-theme') === 'dark';
+                }).observe(htmlEl, { attributes: true, attributeFilter: ['data-theme'] });
+            }
+
+            // Gmail integration status
+            checkGmailIntegration();
+        });
+
+        async function checkGmailIntegration() {
+            try {
+                const resp = await fetch(`${API_BASE}/gmail/status`, {
+                    headers: window.Auth.getHeaders()
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const badge = document.getElementById('gmail-int-badge');
+                    const connectBtn = document.getElementById('gmail-int-connect');
+                    const disconnectBtn = document.getElementById('gmail-int-disconnect');
+                    const desc = document.getElementById('gmail-int-desc');
+                    if (data.connected) {
+                        badge.textContent = 'Connected';
+                        badge.style.cssText = 'display:inline-flex;background:rgba(16,185,129,0.15);color:#10b981;';
+                        desc.textContent = `Connected as ${data.email}. Gmail reading, classification, and Calendar sync are active.`;
+                        connectBtn.style.display = 'none';
+                        disconnectBtn.style.display = 'inline-flex';
+                    } else {
+                        badge.textContent = 'Not Connected';
+                        badge.style.cssText = 'display:inline-flex;background:rgba(239,68,68,0.1);color:#ef4444;';
+                        connectBtn.style.display = 'inline-flex';
+                        disconnectBtn.style.display = 'none';
+                    }
+                }
+            } catch (e) { console.warn('Gmail status check failed'); }
+        }
+
+        async function connectGmailSettings() {
+            const resp = await fetch(`${API_BASE}/gmail/connect`, { headers: window.Auth.getHeaders() });
+            if (resp.ok) { const d = await resp.json(); window.location.href = d.auth_url; }
+        }
+
+        async function disconnectGmailSettings() {
+            if (!confirm('Disconnect Gmail? You will need to reconnect to use email features.')) return;
+            await fetch(`${API_BASE}/gmail/disconnect`, { method: 'POST', headers: window.Auth.getHeaders() });
+            window.location.reload();
+        }
+
+        function saveProfile() {
+            const name = document.getElementById('profile-name').value.trim();
+            if (!name) { alert('Name cannot be empty.'); return; }
+            const user = window.Auth.getUser();
+            if (user) {
+                user.name = name;
+                localStorage.setItem('inbex-user', JSON.stringify(user));
+                const enc = encodeURIComponent(name);
+                document.getElementById('settings-avatar').src = `https://ui-avatars.com/api/?name=${enc}&background=6366f1&color=fff&rounded=true`;
+                document.getElementById('profile-avatar').src = `https://ui-avatars.com/api/?name=${enc}&background=6366f1&color=fff&size=80&rounded=true`;
+                alert('Profile updated!');
+            }
+        }
+
+        function logoutUser() {
+            if (!confirm('Are you sure you want to sign out?')) return;
+            if (window.Auth) window.Auth.clearSession();
+            window.location.href = 'index.html';
+        }
+
+        // ── Preferences Persistence ──
+        const PREFS_KEY = 'inbex-prefs';
+        const PREF_DEFAULTS = {
+            autoSend: false,
+            financeApproval: true,
+            urgencyThreshold: '90',
+            emailDigest: true,
+            inappNotif: true,
+        };
+
+        function loadPrefs() {
+            try { return { ...PREF_DEFAULTS, ...JSON.parse(localStorage.getItem(PREFS_KEY)) }; }
+            catch { return { ...PREF_DEFAULTS }; }
+        }
+
+        function savePrefs(prefs) {
+            localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+            window.InbexPrefs = prefs;
+        }
+
+        function showSettingsToast(msg) {
+            let t = document.getElementById('settings-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'settings-toast';
+                t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--clr-accent-1);color:#fff;padding:10px 20px;border-radius:10px;font-size:0.85rem;font-weight:500;z-index:9999;opacity:0;transform:translateY(10px);transition:all 0.3s ease;box-shadow:0 4px 20px rgba(99,102,241,0.4);';
+                document.body.appendChild(t);
+            }
+            t.textContent = '✓ ' + msg;
+            t.style.opacity = '1';
+            t.style.transform = 'translateY(0)';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; }, 2000);
+        }
+
+        // Initialize preferences
+        (function initPrefs() {
+            const prefs = loadPrefs();
+            window.InbexPrefs = prefs;
+
+            const els = {
+                autoSend: document.getElementById('pref-auto-send'),
+                financeApproval: document.getElementById('pref-finance-approval'),
+                urgencyThreshold: document.getElementById('pref-urgency-threshold'),
+                emailDigest: document.getElementById('pref-email-digest'),
+                inappNotif: document.getElementById('pref-inapp-notif'),
+            };
+
+            // Set initial state
+            if (els.autoSend) els.autoSend.checked = prefs.autoSend;
+            if (els.financeApproval) els.financeApproval.checked = prefs.financeApproval;
+            if (els.urgencyThreshold) els.urgencyThreshold.value = prefs.urgencyThreshold;
+            if (els.emailDigest) els.emailDigest.checked = prefs.emailDigest;
+            if (els.inappNotif) els.inappNotif.checked = prefs.inappNotif;
+
+            // Wire up change listeners
+            if (els.autoSend) els.autoSend.addEventListener('change', () => {
+                prefs.autoSend = els.autoSend.checked;
+                savePrefs(prefs);
+                showSettingsToast(prefs.autoSend ? 'Auto-send replies enabled' : 'Auto-send replies disabled');
+            });
+
+            if (els.financeApproval) els.financeApproval.addEventListener('change', () => {
+                prefs.financeApproval = els.financeApproval.checked;
+                savePrefs(prefs);
+                showSettingsToast(prefs.financeApproval ? 'Finance approval required' : 'Finance approval disabled');
+            });
+
+            if (els.urgencyThreshold) els.urgencyThreshold.addEventListener('change', () => {
+                prefs.urgencyThreshold = els.urgencyThreshold.value;
+                savePrefs(prefs);
+                showSettingsToast(`Urgency threshold set to ${prefs.urgencyThreshold}%`);
+            });
+
+            if (els.emailDigest) els.emailDigest.addEventListener('change', () => {
+                prefs.emailDigest = els.emailDigest.checked;
+                savePrefs(prefs);
+                showSettingsToast(prefs.emailDigest ? 'Email digest enabled' : 'Email digest disabled');
+            });
+
+            if (els.inappNotif) els.inappNotif.addEventListener('change', () => {
+                prefs.inappNotif = els.inappNotif.checked;
+                savePrefs(prefs);
+                showSettingsToast(prefs.inappNotif ? 'In-app notifications enabled' : 'In-app notifications disabled');
+            });
+        })();
+    </script>
+</body>
+
+</html>
