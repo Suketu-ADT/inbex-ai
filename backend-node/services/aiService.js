@@ -183,7 +183,11 @@ async function generateSummary(emailText) {
 
         if (resp.ok) {
             const data = await resp.json();
-            return (data.choices?.[0]?.message?.content || '').trim();
+            let content = (data.choices?.[0]?.message?.content || '').trim();
+            // Post-process: strip markdown code blocks and backticks
+            content = content.replace(/```[\s\S]*?```/g, ''); // Remove code blocks
+            content = content.replace(/`([^`]+)`/g, '$1');    // Remove inline backticks but keep text
+            return content || 'Summary unavailable.';
         }
     } catch (err) {
         console.error('[AI Summary] Error:', err);
