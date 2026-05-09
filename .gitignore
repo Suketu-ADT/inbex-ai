@@ -1,7 +1,12 @@
 node_modules/
 .env
 database.sqlite
+*.db
+*.pkl
 app/venv/
 .DS_Store
 __pycache__/
 *.pyc
+*.log
+server.err.log
+server.out.log

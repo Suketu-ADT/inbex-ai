@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="signup-extra.css" />
 </head>
 
 <body>
@@ -51,7 +52,7 @@
                 <p class="card-subtitle">Sign in to continue to your workspace</p>
             </header>
 
-            <!-- ── Form ── -->
+            <!-- ── Login Form ── -->
             <form id="login-form" class="login-form" novalidate autocomplete="on">
 
                 <!-- Email -->
@@ -140,11 +141,126 @@
 
             </form>
 
+            <!-- ══════════════════════════════════════
+                 FORGOT PASSWORD — Step 1: Enter Email
+            ══════════════════════════════════════ -->
+            <div id="fp-step-1" class="otp-panel" hidden>
+                <div class="otp-panel-header">
+                    <button type="button" class="otp-back-btn" id="fp-back-1">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Back to sign in
+                    </button>
+                </div>
+                <div class="otp-icon-wrap" aria-hidden="true">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="14" fill="url(#fpGrad1)"/>
+                        <path d="M24 14v10m0 4v2" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="fpGrad1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2 class="otp-title">Forgot your password?</h2>
+                <p class="otp-subtitle">Enter your account email and we'll send you a reset code.</p>
+                <input type="email" id="fp-email" class="input-field no-toggle"
+                    placeholder="you@company.com" autocomplete="email"
+                    style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(148,163,184,0.2);background:rgba(15,23,42,0.6);color:#f1f5f9;font-size:14px;font-family:inherit;outline:none;margin-bottom:6px;"/>
+                <span id="fp-email-error" style="display:block;font-size:12px;color:#f87171;min-height:18px;margin-bottom:16px;"></span>
+                <button type="button" class="btn-primary" id="fp-send-btn" style="width:100%;">
+                    <span class="btn-text">Send Reset Code</span>
+                    <span class="btn-loader" aria-hidden="true"></span>
+                </button>
+            </div>
+
+            <!-- ══════════════════════════════════════
+                 FORGOT PASSWORD — Step 2: Enter OTP
+            ══════════════════════════════════════ -->
+            <div id="fp-step-2" class="otp-panel" hidden>
+                <div class="otp-panel-header">
+                    <button type="button" class="otp-back-btn" id="fp-back-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Back
+                    </button>
+                </div>
+                <div class="otp-icon-wrap" aria-hidden="true">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="14" fill="url(#fpGrad2)"/>
+                        <path d="M12 18h24M12 24h16M12 30h10" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                        <circle cx="36" cy="30" r="5" fill="white" opacity="0.95"/>
+                        <defs>
+                            <linearGradient id="fpGrad2" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2 class="otp-title">Check your email</h2>
+                <p class="otp-subtitle">We sent a 6-digit code to<br/><strong id="fp-email-display" class="otp-email"></strong></p>
+                <div class="otp-inputs" id="fp-otp-inputs" role="group" aria-label="Enter 6-digit reset code">
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="fp-d1" aria-label="Digit 1" autocomplete="one-time-code"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="fp-d2" aria-label="Digit 2"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="fp-d3" aria-label="Digit 3"/>
+                    <span class="otp-sep" aria-hidden="true">&#8212;</span>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="fp-d4" aria-label="Digit 4"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="fp-d5" aria-label="Digit 5"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="fp-d6" aria-label="Digit 6"/>
+                </div>
+                <span id="fp-otp-error" style="display:block;font-size:12px;color:#f87171;min-height:18px;margin-bottom:16px;text-align:center;"></span>
+                <button type="button" class="btn-primary" id="fp-verify-btn" style="width:100%;margin-bottom:20px;">
+                    <span class="btn-text">Verify Code</span>
+                    <span class="btn-loader" aria-hidden="true"></span>
+                </button>
+                <p class="otp-resend-wrap">
+                    Didn't receive it?
+                    <button type="button" class="otp-resend-btn" id="fp-resend-btn" disabled>
+                        Resend code <span id="fp-countdown" class="otp-countdown">(30s)</span>
+                    </button>
+                </p>
+            </div>
+
+            <!-- ══════════════════════════════════════
+                 FORGOT PASSWORD — Step 3: New Password
+            ══════════════════════════════════════ -->
+            <div id="fp-step-3" class="otp-panel" hidden>
+                <div class="otp-icon-wrap" aria-hidden="true">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="14" fill="url(#fpGrad3)"/>
+                        <rect x="12" y="22" width="24" height="16" rx="3" stroke="white" stroke-width="2"/>
+                        <path d="M17 22v-5a7 7 0 0114 0v5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="24" cy="30" r="2.5" fill="white"/>
+                        <defs>
+                            <linearGradient id="fpGrad3" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2 class="otp-title">Set new password</h2>
+                <p class="otp-subtitle" style="margin-bottom:20px;">Choose a strong password for your account.</p>
+                <input type="password" id="fp-new-pw" class="input-field"
+                    placeholder="New password (min. 8 chars)"
+                    style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(148,163,184,0.2);background:rgba(15,23,42,0.6);color:#f1f5f9;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;"/>
+                <input type="password" id="fp-confirm-pw" class="input-field"
+                    placeholder="Confirm new password"
+                    style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(148,163,184,0.2);background:rgba(15,23,42,0.6);color:#f1f5f9;font-size:14px;font-family:inherit;outline:none;margin-bottom:6px;"/>
+                <span id="fp-pw-error" style="display:block;font-size:12px;color:#f87171;min-height:18px;margin-bottom:16px;"></span>
+                <button type="button" class="btn-primary" id="fp-reset-btn" style="width:100%;">
+                    <span class="btn-text">Reset Password</span>
+                    <span class="btn-loader" aria-hidden="true"></span>
+                </button>
+            </div>
+
             <!-- ── Footer ── -->
             <footer class="card-footer">
                 <p class="footer-text">
                     Don't have an account?
-                    <a href="signup.html" class="footer-link">Create one free →</a>
+                    <a href="signup.html" class="footer-link">Create one free &rarr;</a>
                 </p>
             </footer>
 
@@ -153,8 +269,7 @@
 
     <!-- Page footer -->
     <footer class="page-footer" role="contentinfo">
-        <p>&copy; 2026 INBEX Technologies, Inc. &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a
-                href="#">Terms</a></p>
+        <p>&copy; 2026 INBEX Technologies, Inc. &nbsp;&middot;&nbsp; <a href="#">Privacy</a> &nbsp;&middot;&nbsp; <a href="#">Terms</a></p>
     </footer>
 
     <script src="auth.js"></script>

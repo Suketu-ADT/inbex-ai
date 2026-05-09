@@ -162,11 +162,255 @@ googleBtn.addEventListener('click', () => {
 });
 
 /* =====================================================
-   5. FORGOT PASSWORD STUB
+   5. FORGOT PASSWORD — 3-step flow
 ===================================================== */
+
+// State
+let fpResetToken = null;
+let fpEmail      = null;
+let fpCountdownTimer = null;
+
+// All panels (loginForm already declared at top of file)
+const fpStep1    = document.getElementById('fp-step-1');
+const fpStep2    = document.getElementById('fp-step-2');
+const fpStep3    = document.getElementById('fp-step-3');
+
+function showPanel(panel) {
+    [loginForm, fpStep1, fpStep2, fpStep3].forEach(p => { if (p) p.hidden = true; });
+    if (panel) panel.hidden = false;
+}
+
+// "Forgot password?" link → Step 1
 forgotLink.addEventListener('click', (e) => {
     e.preventDefault();
-    showToast('Password reset link sent — check your inbox.', 'success');
+    document.getElementById('fp-email').value = emailInput.value || '';
+    document.getElementById('fp-email-error').textContent = '';
+    showPanel(fpStep1);
+    setTimeout(() => document.getElementById('fp-email').focus(), 80);
+});
+
+// Step 1 — Back
+document.getElementById('fp-back-1').addEventListener('click', () => {
+    showPanel(loginForm);
+});
+
+// Step 1 — Send OTP
+document.getElementById('fp-send-btn').addEventListener('click', async () => {
+    const email = document.getElementById('fp-email').value.trim();
+    const errEl = document.getElementById('fp-email-error');
+    const btn   = document.getElementById('fp-send-btn');
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errEl.textContent = 'Please enter a valid email address.';
+        return;
+    }
+    errEl.textContent = '';
+    btn.classList.add('loading'); btn.disabled = true;
+
+    try {
+        const resp = await fetch(`${API_BASE}/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Failed to send reset code.');
+
+        fpEmail = email;
+        document.getElementById('fp-email-display').textContent = email;
+
+        // Reset OTP digits
+        document.querySelectorAll('#fp-otp-inputs .otp-digit').forEach(d => {
+            d.value = ''; d.classList.remove('filled', 'otp-shake');
+        });
+        document.getElementById('fp-otp-error').textContent = '';
+
+        showPanel(fpStep2);
+        fpStartCountdown(30);
+        setTimeout(() => document.getElementById('fp-d1').focus(), 80);
+        showToast('Reset code sent! Check your inbox.', 'success');
+
+    } catch (err) {
+        errEl.textContent = err.message;
+    } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
+});
+
+// Allow Enter key on fp-email input
+document.getElementById('fp-email').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('fp-send-btn').click();
+});
+
+// Step 2 — Back
+document.getElementById('fp-back-2').addEventListener('click', () => {
+    fpClearCountdown();
+    showPanel(fpStep1);
+});
+
+// Step 2 — OTP digit inputs (auto-advance + paste)
+const fpDigits = Array.from(document.querySelectorAll('#fp-otp-inputs .otp-digit'));
+fpDigits.forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val ? val[val.length - 1] : '';
+        if (val) {
+            input.classList.add('filled');
+            if (idx < fpDigits.length - 1) fpDigits[idx + 1].focus();
+            else { input.blur(); fpSubmitOTP(); }
+        } else {
+            input.classList.remove('filled');
+        }
+        document.getElementById('fp-otp-error').textContent = '';
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && idx > 0) {
+            fpDigits[idx - 1].focus();
+            fpDigits[idx - 1].value = '';
+            fpDigits[idx - 1].classList.remove('filled');
+        }
+    });
+    input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        if (pasted.length >= 6) {
+            fpDigits.forEach((d, i) => { d.value = pasted[i] || ''; d.classList.toggle('filled', !!pasted[i]); });
+            fpDigits[5].focus();
+        }
+    });
+});
+
+// Step 2 — Verify OTP
+document.getElementById('fp-verify-btn').addEventListener('click', fpSubmitOTP);
+
+async function fpSubmitOTP() {
+    const otp   = fpDigits.map(d => d.value).join('');
+    const errEl = document.getElementById('fp-otp-error');
+    const btn   = document.getElementById('fp-verify-btn');
+
+    if (otp.length < 6) {
+        errEl.textContent = 'Please enter all 6 digits.';
+        fpShakeDigits();
+        return;
+    }
+    errEl.textContent = '';
+    btn.classList.add('loading'); btn.disabled = true;
+
+    try {
+        const resp = await fetch(`${API_BASE}/auth/verify-reset-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: fpEmail, otp }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Invalid code.');
+
+        fpResetToken = data.reset_token;
+        fpClearCountdown();
+        document.getElementById('fp-new-pw').value = '';
+        document.getElementById('fp-confirm-pw').value = '';
+        document.getElementById('fp-pw-error').textContent = '';
+        showPanel(fpStep3);
+        setTimeout(() => document.getElementById('fp-new-pw').focus(), 80);
+
+    } catch (err) {
+        errEl.textContent = err.message;
+        fpShakeDigits();
+    } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
+}
+
+function fpShakeDigits() {
+    fpDigits.forEach(d => {
+        d.classList.remove('otp-shake');
+        void d.offsetWidth;
+        d.classList.add('otp-shake');
+    });
+    setTimeout(() => fpDigits.forEach(d => d.classList.remove('otp-shake')), 400);
+}
+
+// Step 2 — Resend
+document.getElementById('fp-resend-btn').addEventListener('click', async () => {
+    document.getElementById('fp-resend-btn').disabled = true;
+    fpDigits.forEach(d => { d.value = ''; d.classList.remove('filled'); });
+    document.getElementById('fp-otp-error').textContent = '';
+
+    try {
+        const resp = await fetch(`${API_BASE}/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: fpEmail }),
+        });
+        if (!resp.ok) throw new Error('Failed to resend.');
+        showToast('New code sent!', 'success');
+        fpStartCountdown(30);
+        fpDigits[0].focus();
+    } catch {
+        document.getElementById('fp-resend-btn').disabled = false;
+        showToast('Could not resend code. Try again.', 'error');
+    }
+});
+
+function fpStartCountdown(secs) {
+    const btn = document.getElementById('fp-resend-btn');
+    const cd  = document.getElementById('fp-countdown');
+    btn.disabled = true;
+    let remaining = secs;
+    cd.textContent = `(${remaining}s)`;
+    cd.hidden = false;
+    fpCountdownTimer = setInterval(() => {
+        remaining--;
+        cd.textContent = `(${remaining}s)`;
+        if (remaining <= 0) {
+            clearInterval(fpCountdownTimer);
+            btn.disabled = false;
+            cd.hidden = true;
+        }
+    }, 1000);
+}
+
+function fpClearCountdown() {
+    if (fpCountdownTimer) { clearInterval(fpCountdownTimer); fpCountdownTimer = null; }
+}
+
+// Step 3 — Reset Password
+document.getElementById('fp-reset-btn').addEventListener('click', async () => {
+    const newPw  = document.getElementById('fp-new-pw').value;
+    const cfmPw  = document.getElementById('fp-confirm-pw').value;
+    const errEl  = document.getElementById('fp-pw-error');
+    const btn    = document.getElementById('fp-reset-btn');
+
+    if (!newPw || newPw.length < 8) {
+        errEl.textContent = 'Password must be at least 8 characters.';
+        return;
+    }
+    if (newPw !== cfmPw) {
+        errEl.textContent = "Passwords don't match.";
+        return;
+    }
+    errEl.textContent = '';
+    btn.classList.add('loading'); btn.disabled = true;
+
+    try {
+        const resp = await fetch(`${API_BASE}/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reset_token: fpResetToken, new_password: newPw }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Reset failed.');
+
+        showToast('Password reset! You can now sign in.', 'success');
+        fpResetToken = null;
+        fpEmail = null;
+        showPanel(loginForm);
+
+    } catch (err) {
+        errEl.textContent = err.message;
+    } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+    }
 });
 
 /* =====================================================

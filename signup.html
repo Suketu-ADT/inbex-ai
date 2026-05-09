@@ -208,16 +208,74 @@
 
             </form>
 
+            <!-- ── OTP Verification Panel (hidden until OTP sent) ── -->
+            <div id="otp-panel" class="otp-panel" hidden aria-live="polite">
+                <div class="otp-panel-header">
+                    <button type="button" id="otp-back-btn" class="otp-back-btn" aria-label="Go back to signup form">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Back
+                    </button>
+                </div>
+
+                <div class="otp-icon-wrap" aria-hidden="true">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="14" fill="url(#otpGrad)"/>
+                        <path d="M12 18h24M12 24h16M12 30h10" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                        <circle cx="36" cy="30" r="5" fill="white" opacity="0.95"/>
+                        <defs>
+                            <linearGradient id="otpGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1"/>
+                                <stop offset="1" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <h2 class="otp-title">Check your email</h2>
+                <p class="otp-subtitle">
+                    We sent a 6-digit code to<br/>
+                    <strong id="otp-email-display" class="otp-email"></strong>
+                </p>
+
+                <!-- 6 digit inputs -->
+                <div class="otp-inputs" id="otp-inputs" role="group" aria-label="Enter 6-digit verification code">
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d1" aria-label="Digit 1" autocomplete="one-time-code"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d2" aria-label="Digit 2"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d3" aria-label="Digit 3"/>
+                    <span class="otp-sep" aria-hidden="true">&#8212;</span>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d4" aria-label="Digit 4"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d5" aria-label="Digit 5"/>
+                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d6" aria-label="Digit 6"/>
+                </div>
+
+                <span class="field-error otp-error" id="otp-error" role="alert" aria-live="polite"></span>
+
+                <button type="button" class="btn-primary otp-verify-btn-el" id="otp-verify-btn">
+                    <span class="btn-text">Verify &amp; Create Account</span>
+                    <span class="btn-loader" aria-hidden="true"></span>
+                </button>
+
+                <p class="otp-resend-wrap">
+                    Didn't receive it?
+                    <button type="button" class="otp-resend-btn" id="otp-resend-btn" disabled>
+                        Resend code <span id="otp-countdown" class="otp-countdown">(30s)</span>
+                    </button>
+                </p>
+            </div>
+
             <!-- ── Footer ── -->
             <footer class="card-footer">
                 <p class="footer-text">
                     Already have an account?
-                    <a href="index.html" class="footer-link">Sign in →</a>
+                    <a href="index.html" class="footer-link">Sign in &rarr;</a>
                 </p>
             </footer>
 
         </article>
     </main>
+
 
     <footer class="page-footer" role="contentinfo">
         <p>&copy; 2026 INBEX Technologies, Inc. &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a

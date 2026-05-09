@@ -1,7 +1,8 @@
 /**
  * INBEX — Settings Router
- * PUT /settings/profile  — Update user profile
- * PUT /settings/password — Change password
+ * PUT    /settings/profile  — Update user profile
+ * PUT    /settings/password — Change password
+ * DELETE /settings/account  — Permanently delete account
  */
 'use strict';
 
@@ -29,4 +30,25 @@ router.put('/settings/password', requireAuth, (req, res) => {
     return res.status(204).send();
 });
 
+// ── DELETE /settings/account ──
+router.delete('/settings/account', requireAuth, (req, res) => {
+    const { password } = req.body;
+
+    if (!password) {
+        return res.status(422).json({ detail: 'Password confirmation is required.' });
+    }
+
+    // Re-verify password before deletion
+    if (!bcrypt.compareSync(password, req.user.hashed_password)) {
+        return res.status(401).json({ detail: 'Incorrect password. Account not deleted.' });
+    }
+
+    // Delete user — cascades to all related data (email_logs, workflows, gmail_tokens, email_automations)
+    run('DELETE FROM users WHERE id = ?', [req.user.id]);
+
+    console.log(`[Settings] 🗑️  Account permanently deleted: ${req.user.email}`);
+    return res.status(200).json({ message: 'Account permanently deleted.' });
+});
+
 module.exports = router;
+

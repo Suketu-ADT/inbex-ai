@@ -1,9 +1,10 @@
 /**
  * INBEX — Auth Router
- * POST /auth/signup   — Register a new user
- * POST /auth/login    — Login and get JWT
- * GET  /auth/me       — Get current user (protected)
- * GET  /auth/google   — Google OAuth Sign-In
+ * POST /auth/send-otp      — Step 1: validate form data, email OTP
+ * POST /auth/verify-otp    — Step 2: verify OTP, create account, return JWT
+ * POST /auth/login         — Login and get JWT
+ * GET  /auth/me            — Get current user (protected)
+ * GET  /auth/google        — Google OAuth Sign-In
  * GET  /auth/google/callback — Google OAuth callback
  */
 'use strict';
@@ -13,14 +14,104 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { google } = require('googleapis');
+const { Resend } = require('resend');
 const config = require('../config');
 const { run, get } = require('../database');
 const requireAuth = require('../middleware/auth');
 
 const router = Router();
 
-// ── POST /auth/signup ──
-router.post('/auth/signup', (req, res) => {
+// ── In-memory OTP store: email → { otp, name, password, expiresAt } ──
+const otpStore = new Map();
+const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+// Clean up expired OTPs every 5 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [email, data] of otpStore.entries()) {
+        if (now > data.expiresAt) otpStore.delete(email);
+    }
+}, 5 * 60 * 1000);
+
+// ── Resend client ──
+const resend = new Resend(config.resendApiKey);
+
+/**
+ * Generate a cryptographically random 6-digit OTP.
+ */
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+/**
+ * Send the OTP email via Resend.
+ */
+async function sendOTPEmail(toEmail, name, otp) {
+    const { error } = await resend.emails.send({
+        from: config.resendFrom,
+        to: [toEmail],
+        subject: 'Your INBEX verification code',
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+</head>
+<body style="margin:0;padding:0;background:#040714;font-family:Inter,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#040714;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="480" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#0d1117 0%,#161b27 100%);border-radius:16px;border:1px solid rgba(99,102,241,0.2);overflow:hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#6366f1,#a855f7);padding:32px;text-align:center;">
+              <div style="display:inline-flex;align-items:center;gap:10px;">
+                <span style="font-size:28px;font-weight:800;color:white;letter-spacing:-0.5px;">INBEX</span>
+              </div>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 36px 32px;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f1f5f9;">Verify your email</h1>
+              <p style="margin:0 0 28px;font-size:15px;color:#94a3b8;line-height:1.6;">
+                Hi ${name}, use the code below to complete your INBEX sign-up.
+                It expires in <strong style="color:#c4b5fd;">10 minutes</strong>.
+              </p>
+              <!-- OTP Box -->
+              <div style="background:rgba(99,102,241,0.1);border:2px solid rgba(99,102,241,0.3);border-radius:12px;padding:28px;text-align:center;margin-bottom:28px;">
+                <span style="font-size:42px;font-weight:800;letter-spacing:16px;color:#a78bfa;font-variant-numeric:tabular-nums;">${otp}</span>
+              </div>
+              <p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">
+                If you didn't request this, you can safely ignore this email. Someone may have mistyped their address.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 36px;border-top:1px solid rgba(255,255,255,0.06);">
+              <p style="margin:0;font-size:12px;color:#475569;text-align:center;">
+                © 2026 INBEX Technologies, Inc. &nbsp;·&nbsp; This is an automated message.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+    });
+
+    if (error) {
+        console.error('[OTP] Resend error:', error);
+        throw new Error('Failed to send verification email. Please try again.');
+    }
+}
+
+// ── POST /auth/send-otp — Step 1 ──
+router.post('/auth/send-otp', async (req, res) => {
     const { name, email, password } = req.body;
 
     // Validation
@@ -40,24 +131,74 @@ router.post('/auth/signup', (req, res) => {
         return res.status(409).json({ detail: 'An account with this email already exists.' });
     }
 
+    // Generate & store OTP
+    const otp = generateOTP();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    otpStore.set(normalizedEmail, {
+        otp,
+        name: name.trim(),
+        password,
+        expiresAt: Date.now() + OTP_TTL_MS,
+    });
+
+    console.log(`[OTP] Generated for ${normalizedEmail}: ${otp}`);
+
+    try {
+        await sendOTPEmail(normalizedEmail, name.trim(), otp);
+        return res.json({ message: 'OTP sent. Check your email.' });
+    } catch (err) {
+        otpStore.delete(normalizedEmail);
+        return res.status(500).json({ detail: err.message });
+    }
+});
+
+// ── POST /auth/verify-otp — Step 2 ──
+router.post('/auth/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(422).json({ detail: 'Email and OTP are required.' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const record = otpStore.get(normalizedEmail);
+
+    if (!record) {
+        return res.status(400).json({ detail: 'No OTP found for this email. Please request a new one.' });
+    }
+
+    if (Date.now() > record.expiresAt) {
+        otpStore.delete(normalizedEmail);
+        return res.status(400).json({ detail: 'OTP has expired. Please request a new one.' });
+    }
+
+    if (record.otp !== otp.trim()) {
+        return res.status(400).json({ detail: 'Invalid OTP. Please try again.' });
+    }
+
+    // OTP valid — consume it
+    otpStore.delete(normalizedEmail);
+
     // Create user
     const id = uuidv4();
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = bcrypt.hashSync(record.password, 10);
     const now = new Date().toISOString();
 
     run(
         'INSERT INTO users (id, name, email, hashed_password, is_active, created_at) VALUES (?, ?, ?, ?, 1, ?)',
-        [id, name.trim(), email.trim().toLowerCase(), hashedPassword, now]
+        [id, record.name, normalizedEmail, hashedPassword, now]
     );
 
-    // Issue token
+    // Issue JWT
     const token = jwt.sign(
-        { sub: id, email: email.trim().toLowerCase() },
+        { sub: id, email: normalizedEmail },
         config.secretKey,
         { algorithm: config.algorithm, expiresIn: `${config.accessTokenExpireMinutes}m` }
     );
 
     const user = get('SELECT * FROM users WHERE id = ?', [id]);
+    console.log(`[Auth] ✅ New user verified and created: ${normalizedEmail}`);
 
     return res.status(201).json({
         access_token: token,
@@ -122,7 +263,6 @@ router.get('/auth/google', (req, res) => {
 });
 
 // ── GET /auth/google/callback — Handle Google OAuth callback ──
-// If `state` is present, this is a Gmail connect callback — pass to gmail router
 router.get('/auth/google/callback', async (req, res, next) => {
     const { code, state } = req.query;
     if (!code) {
@@ -156,7 +296,6 @@ router.get('/auth/google/callback', async (req, res, next) => {
         if (!user) {
             const id = uuidv4();
             const now = new Date().toISOString();
-            // Create user with random password (Google users don't need one)
             const randomPw = bcrypt.hashSync(uuidv4(), 10);
             run(
                 'INSERT INTO users (id, name, email, hashed_password, is_active, created_at) VALUES (?, ?, ?, ?, 1, ?)',
@@ -177,7 +316,6 @@ router.get('/auth/google/callback', async (req, res, next) => {
 
         const userData = formatUser(user);
 
-        // Return a page that stores the token in localStorage and redirects
         return res.send(`
 <!DOCTYPE html>
 <html><head><title>Signing in...</title></head>
@@ -210,5 +348,131 @@ function formatUser(user) {
         created_at: user.created_at,
     };
 }
+
+/* ══════════════════════════════════════════
+   FORGOT PASSWORD — 3-step OTP flow
+   POST /auth/forgot-password     → send OTP to email
+   POST /auth/verify-reset-otp    → verify OTP, return reset token
+   POST /auth/reset-password      → use reset token to set new password
+══════════════════════════════════════════ */
+
+// In-memory store: email → { otp, expiresAt }
+const resetOtpStore = new Map();
+// In-memory store: resetToken → { email, expiresAt }
+const resetTokenStore = new Map();
+const RESET_OTP_TTL_MS   = 10 * 60 * 1000; // 10 min
+const RESET_TOKEN_TTL_MS =  5 * 60 * 1000; // 5 min
+
+// Clean up expired entries every 5 min
+setInterval(() => {
+    const now = Date.now();
+    for (const [k, v] of resetOtpStore.entries())   if (now > v.expiresAt) resetOtpStore.delete(k);
+    for (const [k, v] of resetTokenStore.entries())  if (now > v.expiresAt) resetTokenStore.delete(k);
+}, 5 * 60 * 1000);
+
+// ── POST /auth/forgot-password ──
+router.post('/auth/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(422).json({ detail: 'A valid email is required.' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = get('SELECT id, name FROM users WHERE email = ?', [normalizedEmail]);
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+        return res.json({ message: 'If this email exists, a reset code has been sent.' });
+    }
+
+    const otp = generateOTP();
+    resetOtpStore.set(normalizedEmail, { otp, expiresAt: Date.now() + RESET_OTP_TTL_MS });
+    console.log(`[Reset] OTP for ${normalizedEmail}: ${otp}`);
+
+    try {
+        const { error } = await resend.emails.send({
+            from: config.resendFrom,
+            to: [normalizedEmail],
+            subject: 'Reset your INBEX password',
+            html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#040714;font-family:Inter,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#040714;padding:40px 0;">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#0d1117,#161b27);border-radius:16px;border:1px solid rgba(99,102,241,0.2);overflow:hidden;">
+        <tr><td style="background:linear-gradient(135deg,#6366f1,#a855f7);padding:32px;text-align:center;">
+          <span style="font-size:28px;font-weight:800;color:white;">INBEX</span>
+        </td></tr>
+        <tr><td style="padding:40px 36px 32px;">
+          <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f1f5f9;">Reset your password</h1>
+          <p style="margin:0 0 28px;font-size:15px;color:#94a3b8;line-height:1.6;">
+            Hi ${user.name}, use the code below to reset your INBEX password.
+            It expires in <strong style="color:#c4b5fd;">10 minutes</strong>.
+          </p>
+          <div style="background:rgba(99,102,241,0.1);border:2px solid rgba(99,102,241,0.3);border-radius:12px;padding:28px;text-align:center;margin-bottom:28px;">
+            <span style="font-size:42px;font-weight:800;letter-spacing:16px;color:#a78bfa;">${otp}</span>
+          </div>
+          <p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">
+            If you didn't request this, you can safely ignore this email.
+          </p>
+        </td></tr>
+        <tr><td style="padding:20px 36px;border-top:1px solid rgba(255,255,255,0.06);">
+          <p style="margin:0;font-size:12px;color:#475569;text-align:center;">© 2026 INBEX Technologies, Inc.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+        });
+        if (error) throw new Error(error.message);
+    } catch (err) {
+        resetOtpStore.delete(normalizedEmail);
+        return res.status(500).json({ detail: 'Failed to send reset email. Please try again.' });
+    }
+
+    return res.json({ message: 'If this email exists, a reset code has been sent.' });
+});
+
+// ── POST /auth/verify-reset-otp ──
+router.post('/auth/verify-reset-otp', (req, res) => {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(422).json({ detail: 'Email and OTP are required.' });
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const record = resetOtpStore.get(normalizedEmail);
+
+    if (!record)                    return res.status(400).json({ detail: 'No reset code found. Please request a new one.' });
+    if (Date.now() > record.expiresAt) { resetOtpStore.delete(normalizedEmail); return res.status(400).json({ detail: 'Code has expired. Please request a new one.' }); }
+    if (record.otp !== otp.trim())  return res.status(400).json({ detail: 'Invalid code. Please try again.' });
+
+    // Consume OTP and issue short-lived reset token
+    resetOtpStore.delete(normalizedEmail);
+    const resetToken = uuidv4();
+    resetTokenStore.set(resetToken, { email: normalizedEmail, expiresAt: Date.now() + RESET_TOKEN_TTL_MS });
+
+    return res.json({ reset_token: resetToken });
+});
+
+// ── POST /auth/reset-password ──
+router.post('/auth/reset-password', (req, res) => {
+    const { reset_token, new_password } = req.body;
+    if (!reset_token || !new_password) return res.status(422).json({ detail: 'Reset token and new password are required.' });
+    if (new_password.length < 8) return res.status(422).json({ detail: 'Password must be at least 8 characters.' });
+
+    const record = resetTokenStore.get(reset_token);
+    if (!record)                    return res.status(400).json({ detail: 'Invalid or expired reset token. Please start over.' });
+    if (Date.now() > record.expiresAt) { resetTokenStore.delete(reset_token); return res.status(400).json({ detail: 'Reset token has expired. Please start over.' }); }
+
+    resetTokenStore.delete(reset_token);
+
+    const hashed = bcrypt.hashSync(new_password, 10);
+    run('UPDATE users SET hashed_password = ? WHERE email = ?', [hashed, record.email]);
+
+    console.log(`[Auth] ✅ Password reset for: ${record.email}`);
+    return res.json({ message: 'Password reset successfully. You can now log in.' });
+});
 
 module.exports = router;

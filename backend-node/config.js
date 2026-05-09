@@ -26,6 +26,10 @@ const config = {
     googleClientId: process.env.GOOGLE_CLIENT_ID || '',
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/google/callback',
+
+    // Resend (OTP email)
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    resendFrom: process.env.RESEND_FROM_EMAIL || 'INBEX <onboarding@resend.dev>',
 };
 
 module.exports = config;
