@@ -1271,3 +1271,521 @@ input:checked+.slider:before {
         grid-template-columns: 1fr;
     }
 }
+
+/* =====================================================
+   NEW — Smart Reply 3-Tone Panel
+===================================================== */
+.smart-reply-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+}
+
+.tone-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+}
+
+.tone-card {
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    cursor: pointer;
+    transition: all var(--t-base);
+    background: var(--bg-input);
+    position: relative;
+    overflow: hidden;
+}
+
+.tone-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    opacity: 0;
+    transition: opacity var(--t-base);
+}
+
+.tone-card.tone-formal::before   { background: #6366f1; }
+.tone-card.tone-friendly::before { background: #10b981; }
+.tone-card.tone-brief::before    { background: #f59e0b; }
+
+.tone-card:hover,
+.tone-card.selected {
+    border-color: var(--border-highlight);
+    background: var(--bg-surface-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+.tone-card:hover::before,
+.tone-card.selected::before { opacity: 1; }
+
+.tone-card.selected {
+    border-color: var(--clr-accent-1);
+    box-shadow: 0 0 0 1px var(--clr-accent-1), var(--shadow-soft);
+}
+
+.tone-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-2);
+}
+
+.tone-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.tone-label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.tone-text {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tone-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+
+.tone-skeleton {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg,
+        var(--bg-input) 0%,
+        var(--bg-surface-hover) 50%,
+        var(--bg-input) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 8px;
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+}
+
+/* =====================================================
+   NEW — Priority Score Badge
+===================================================== */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.priority-high {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.priority-medium {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.priority-low {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.priority-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.priority-high   .priority-dot { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
+.priority-medium .priority-dot { background: #f59e0b; box-shadow: 0 0 4px #f59e0b; }
+.priority-low    .priority-dot { background: #10b981; }
+
+/* =====================================================
+   NEW — Inbox Chat Widget
+===================================================== */
+.inbox-chat-panel {
+    border-radius: var(--r-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+}
+
+.inbox-chat-messages {
+    padding: var(--sp-4) var(--sp-5);
+    min-height: 100px;
+    max-height: 240px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+}
+
+.chat-msg {
+    display: flex;
+    gap: var(--sp-3);
+    animation: fadeUp 0.3s ease both;
+}
+
+.chat-msg.user-msg {
+    flex-direction: row-reverse;
+}
+
+.chat-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+}
+
+.chat-avatar.ai-avatar {
+    background: var(--gradient-accent);
+    color: white;
+}
+
+.chat-avatar.user-avatar {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.chat-bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.ai-bubble {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px 12px 12px 12px;
+    color: var(--text-primary);
+}
+
+.user-bubble {
+    background: var(--gradient-accent);
+    color: white;
+    border-radius: 12px 4px 12px 12px;
+}
+
+.chat-input-row {
+    display: flex;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-surface);
+}
+
+.chat-input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-full);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    padding: 8px 16px;
+    outline: none;
+    transition: border-color var(--t-fast);
+}
+
+.chat-input:focus {
+    border-color: var(--clr-accent-1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.chat-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gradient-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--t-fast);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.chat-send-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =====================================================
+   NEW — Enhanced Stat Cards (Count-up + Glassmorphism)
+===================================================== */
+.stat-card {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--r-lg) !important;
+    padding: var(--sp-6) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+    transform: translate(20%, -20%);
+    pointer-events: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--shadow-soft), 0 0 0 1px var(--clr-accent-1), 0 8px 32px rgba(99,102,241,0.15) !important;
+    border-color: rgba(99,102,241,0.3) !important;
+}
+
+/* Count-up number animation */
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.stat-value {
+    animation: countUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered card entrance */
+.overview-grid .stat-card:nth-child(1) { animation-delay: 0ms; }
+.overview-grid .stat-card:nth-child(2) { animation-delay: 80ms; }
+.overview-grid .stat-card:nth-child(3) { animation-delay: 160ms; }
+.overview-grid .stat-card:nth-child(4) { animation-delay: 240ms; }
+
+/* =====================================================
+   NEW — Notification Bell
+===================================================== */
+.notif-bell {
+    position: relative;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #ef4444;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-nav);
+    animation: notifPulse 2s infinite;
+}
+
+@keyframes notifPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50%       { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+}
+
+/* =====================================================
+   NEW — Today's Briefing Banner
+===================================================== */
+.briefing-banner {
+    background: linear-gradient(135deg,
+        rgba(99,102,241,0.08) 0%,
+        rgba(168,85,247,0.08) 50%,
+        rgba(99,102,241,0.04) 100%);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: var(--r-lg);
+    padding: var(--sp-4) var(--sp-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    position: relative;
+    overflow: hidden;
+}
+
+.briefing-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(99,102,241,0.03) 50%,
+        transparent 100%);
+    animation: briefingSweep 4s ease-in-out infinite;
+}
+
+@keyframes briefingSweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.briefing-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+.briefing-stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: rgba(255,255,255,0.06);
+}
+
+.briefing-stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.briefing-stat-value {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.briefing-stat-label {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+/* Divider between briefing stats */
+.briefing-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border-color);
+}
+
+/* =====================================================
+   NEW — AI Insights Cards (Reports page)
+===================================================== */
+.insight-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    gap: var(--sp-4);
+    transition: all var(--t-base);
+}
+
+.insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft), var(--shadow-glow);
+    border-color: rgba(99,102,241,0.3);
+}
+
+.insight-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1));
+    border: 1px solid rgba(99,102,241,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.insight-content h4 {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.insight-content p {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* =====================================================
+   NEW — Snooze Button on Email Items
+===================================================== */
+.snooze-btn {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--r-full);
+    padding: 3px 10px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.snooze-btn:hover {
+    background: rgba(245, 158, 11, 0.2);
+    transform: scale(1.05);
+}
+
+/* Snoozed indicator */
+.snoozed-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+

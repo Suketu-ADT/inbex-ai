@@ -905,25 +905,413 @@ async function sendAiCompose() {
     }
 }
 
-// Expose functions
-window.openComposeModal = openComposeModal;
-window.closeComposeModal = closeComposeModal;
-window.loadActivity = loadActivity;
-window.loadDashboardStats = loadDashboardStats;
-window.generateAiCompose = generateAiCompose;
-window.sendAiCompose = sendAiCompose;
+// ══════════════════════════════════════════════════════
+//  NEW — Smart Reply 3-Tone Panel (OpenRouter / Nemotron)
+// ══════════════════════════════════════════════════════
 
-window.connectGmail = connectGmail;
-window.disconnectGmail = disconnectGmail;
-window.openClassifyWithEmail = openClassifyWithEmail;
-window.openEmailModal = openEmailModal;
-window.closeEmailModal = closeEmailModal;
-window.replyFromModal = replyFromModal;
-window.onEmailSelected = onEmailSelected;
-window.generateAiReply = generateAiReply;
-window.sendAiReply = sendAiReply;
-window.filterUrgentEmails = filterUrgentEmails;
-window.nextEmailPage = nextEmailPage;
-window.prevEmailPage = prevEmailPage;
-window.toggleProfileMenu = toggleProfileMenu;
-window.signOutFromDashboard = signOutFromDashboard;
+let smartReplyTones = null;   // { formal, friendly, brief }
+let selectedTone    = null;   // 'formal' | 'friendly' | 'brief'
+
+/**
+ * Called when user picks an email in the Smart Reply dropdown.
+ * Fires the /ai/smart-reply endpoint and renders 3 tone cards.
+ */
+async function onEmailSelectedSmartReply() {
+    const select  = document.getElementById('ai-email-select');
+    const emailId = select.value;
+
+    const idleState     = document.getElementById('ai-idle-state');
+    const replySection  = document.getElementById('smart-reply-section');
+    const selectedReply = document.getElementById('selected-reply-section');
+
+    if (!emailId) {
+        idleState.style.display    = 'block';
+        replySection.style.display = 'none';
+        selectedAiEmail  = null;
+        smartReplyTones  = null;
+        selectedTone     = null;
+        return;
+    }
+
+    selectedAiEmail = allGmailEmails.find(e => e.id === emailId);
+    if (!selectedAiEmail) return;
+
+    // Show panel + loading skeletons
+    idleState.style.display     = 'none';
+    replySection.style.display  = 'block';
+    selectedReply.style.display = 'none';
+
+    const container = document.getElementById('tone-cards-container');
+    container.innerHTML = `
+        <div id="tone-loading" style="padding:12px 0;">
+            <div class="tone-skeleton" style="width:40%;margin-bottom:16px;"></div>
+            <div class="tone-skeleton" style="width:90%;"></div>
+            <div class="tone-skeleton" style="width:70%;"></div>
+            <div class="tone-skeleton" style="width:80%;margin-top:12px;"></div>
+            <div class="tone-skeleton" style="width:60%;"></div>
+        </div>`;
+
+    smartReplyTones = null;
+    selectedTone    = null;
+
+    addDecisionLog(`Generating 3-tone replies for "${(selectedAiEmail.subject || '').substring(0, 30)}..."`);
+
+    try {
+        const senderMatch = selectedAiEmail.from.match(/^(.+?)\s*</) || [, selectedAiEmail.from];
+        const senderName  = senderMatch[1].replace(/"/g, '').trim();
+        const emailBody   = selectedAiEmail.body || selectedAiEmail.snippet || '';
+
+        const resp = await fetch(`${API_BASE}/ai/smart-reply`, {
+            method:  'POST',
+            headers: window.Auth.getHeaders(),
+            body:    JSON.stringify({
+                emailText:  `Subject: ${selectedAiEmail.subject}\nFrom: ${selectedAiEmail.from}\n\n${emailBody}`,
+                senderName: senderName,
+            }),
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json();
+            throw new Error(err.detail || 'Smart reply failed');
+        }
+
+        const data = await resp.json();
+        smartReplyTones = data.replies;
+        renderToneCards(smartReplyTones, senderName);
+        addDecisionLog(`✨ 3 tone variants ready for ${senderName}`);
+        if (window.Toast) Toast.success('3 reply tones generated!', 'Smart Reply');
+
+    } catch (err) {
+        container.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.85rem;">
+            ❌ ${escapeHtml(err.message)}<br/>
+            <button class="btn btn-outline small" style="margin-top:12px;" onclick="onEmailSelectedSmartReply()">Retry</button>
+        </div>`;
+        console.error('[SmartReply]', err);
+        if (window.Toast) Toast.error(err.message, 'Smart Reply Failed');
+    }
+}
+
+function renderToneCards(tones, senderName) {
+    const container = document.getElementById('tone-cards-container');
+    const configs = [
+        { key: 'formal',   icon: '📋', label: 'Formal',   cls: 'tone-formal'   },
+        { key: 'friendly', icon: '😊', label: 'Friendly', cls: 'tone-friendly' },
+        { key: 'brief',    icon: '⚡', label: 'Brief',    cls: 'tone-brief'    },
+    ];
+
+    container.innerHTML = configs.map(({ key, icon, label, cls }) => `
+        <div class="tone-card ${cls}" id="tone-card-${key}" onclick="selectTone('${key}')">
+            <div class="tone-header">
+                <span class="tone-icon">${icon}</span>
+                <span class="tone-label">${label}</span>
+            </div>
+            <p class="tone-text">${escapeHtml((tones[key] || '').substring(0, 160))}${(tones[key] || '').length > 160 ? '…' : ''}</p>
+        </div>
+    `).join('');
+}
+
+function selectTone(tone) {
+    if (!smartReplyTones || !smartReplyTones[tone]) return;
+    selectedTone = tone;
+
+    // Update card selection state
+    ['formal', 'friendly', 'brief'].forEach(t => {
+        const card = document.getElementById(`tone-card-${t}`);
+        if (card) card.classList.toggle('selected', t === tone);
+    });
+
+    // Populate textarea and show editor
+    const textarea = document.getElementById('ai-reply-text');
+    if (textarea) textarea.value = smartReplyTones[tone];
+
+    const selectedReply = document.getElementById('selected-reply-section');
+    if (selectedReply) selectedReply.style.display = 'block';
+
+    addDecisionLog(`Selected ${tone} tone reply`);
+}
+
+// ══════════════════════════════════════════════════════
+//  NEW — Inbox AI Chat (OpenRouter / Qwen3)
+// ══════════════════════════════════════════════════════
+
+async function sendInboxChat() {
+    const input   = document.getElementById('inbox-chat-input');
+    const sendBtn = document.getElementById('inbox-chat-send');
+    const messages = document.getElementById('inbox-chat-messages');
+
+    const question = input.value.trim();
+    if (!question) return;
+
+    // Append user bubble
+    messages.innerHTML += `
+        <div class="chat-msg user-msg">
+            <div class="chat-avatar user-avatar">👤</div>
+            <div class="chat-bubble user-bubble">${escapeHtml(question)}</div>
+        </div>`;
+
+    input.value   = '';
+    input.disabled = true;
+    sendBtn.disabled = true;
+    messages.scrollTop = messages.scrollHeight;
+
+    // Typing indicator
+    const typingId = `typing-${Date.now()}`;
+    messages.innerHTML += `
+        <div class="chat-msg" id="${typingId}">
+            <div class="chat-avatar ai-avatar">✨</div>
+            <div class="chat-bubble ai-bubble" style="opacity:0.6;">
+                <span style="letter-spacing:2px;">•••</span>
+            </div>
+        </div>`;
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        // Build email context for the AI
+        const emailContext = allGmailEmails.slice(0, 20).map(e => ({
+            from:     e.from || '',
+            subject:  e.subject || '(no subject)',
+            category: e.category || 'Unknown',
+            date:     e.date || '',
+            snippet:  (e.snippet || '').substring(0, 100),
+        }));
+
+        const resp = await fetch(`${API_BASE}/ai/chat`, {
+            method:  'POST',
+            headers: window.Auth.getHeaders(),
+            body:    JSON.stringify({ question, emails: emailContext }),
+        });
+
+        const data = await resp.json();
+        const answer = data.answer || 'Sorry, I could not answer that.';
+
+        // Remove typing indicator, add AI response
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        messages.innerHTML += `
+            <div class="chat-msg">
+                <div class="chat-avatar ai-avatar">✨</div>
+                <div class="chat-bubble ai-bubble">${escapeHtml(answer).replace(/\n/g, '<br/>')}</div>
+            </div>`;
+
+    } catch (err) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        messages.innerHTML += `
+            <div class="chat-msg">
+                <div class="chat-avatar ai-avatar">✨</div>
+                <div class="chat-bubble ai-bubble" style="color:#f87171;">Sorry, I couldn't connect to the AI. Is the backend running?</div>
+            </div>`;
+        console.error('[InboxChat]', err);
+    }
+
+    input.disabled   = false;
+    sendBtn.disabled = false;
+    messages.scrollTop = messages.scrollHeight;
+    input.focus();
+}
+
+// Allow pressing Enter to send chat
+document.addEventListener('DOMContentLoaded', () => {
+    const chatInput = document.getElementById('inbox-chat-input');
+    if (chatInput) {
+        chatInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendInboxChat();
+            }
+        });
+    }
+});
+
+// ══════════════════════════════════════════════════════
+//  NEW — Briefing Banner (Today's Stats)
+// ══════════════════════════════════════════════════════
+
+function updateBriefingBanner(stats) {
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val ?? '—';
+    };
+
+    set('brief-total',       stats?.total_today       ?? '—');
+    set('brief-ai-actions',  stats?.ai_actions_today  ?? '—');
+    set('brief-automations', stats?.automations_today ?? '—');
+    set('brief-time-saved',  stats?.time_saved_mins   ?? '—');
+}
+
+// ══════════════════════════════════════════════════════
+//  NEW — Snooze Email
+// ══════════════════════════════════════════════════════
+
+function snoozeEmail(emailId, minutes = 60) {
+    const snoozed = JSON.parse(localStorage.getItem('inbex-snoozed') || '[]');
+    const email   = allGmailEmails.find(e => e.id === emailId);
+    if (!email) return;
+
+    const snoozeUntil = Date.now() + minutes * 60 * 1000;
+    snoozed.push({ id: emailId, subject: email.subject, snoozeUntil });
+    localStorage.setItem('inbex-snoozed', JSON.stringify(snoozed));
+
+    if (window.Toast) Toast.success(`Snoozed for ${minutes} mins`, 'Email Snoozed ⏰');
+    addDecisionLog(`⏰ Snoozed "${(email.subject || '').substring(0, 30)}" for ${minutes} min`);
+}
+
+function checkSnoozedEmails() {
+    const snoozed = JSON.parse(localStorage.getItem('inbex-snoozed') || '[]');
+    const now = Date.now();
+    const due = snoozed.filter(s => now >= s.snoozeUntil);
+    const remaining = snoozed.filter(s => now < s.snoozeUntil);
+
+    due.forEach(s => {
+        if (window.Toast) Toast.warn(`Time to revisit: "${s.subject}"`, 'Snoozed Email ⏰', 8000);
+    });
+
+    if (due.length > 0) localStorage.setItem('inbex-snoozed', JSON.stringify(remaining));
+}
+
+// Check snoozed emails on load and every 5 minutes
+document.addEventListener('DOMContentLoaded', () => {
+    checkSnoozedEmails();
+    setInterval(checkSnoozedEmails, 5 * 60 * 1000);
+});
+
+// ══════════════════════════════════════════════════════
+//  UPDATED — AI Compose (now uses /ai/compose)
+// ══════════════════════════════════════════════════════
+
+async function generateAiCompose() {
+    const prompt       = document.getElementById('compose-prompt').value.trim();
+    const recipientTo  = document.getElementById('compose-to').value.trim();
+    if (!prompt) {
+        if (window.Toast) Toast.warn('Please describe what the email should be about.', 'Prompt Required');
+        return;
+    }
+
+    const btn        = document.getElementById('compose-generate-btn');
+    const resultArea = document.getElementById('compose-result-area');
+
+    btn.disabled = true;
+    btn.innerHTML = `<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></span> Generating...`;
+
+    try {
+        const resp = await fetch(`${API_BASE}/ai/compose`, {
+            method:  'POST',
+            headers: window.Auth.getHeaders(),
+            body:    JSON.stringify({
+                prompt,
+                recipientEmail: recipientTo,
+            }),
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            document.getElementById('compose-subject').value = data.subject || '';
+            document.getElementById('compose-body').value    = data.body    || '';
+            resultArea.style.display = 'flex';
+            if (window.Toast) Toast.success('Email drafted successfully!', 'AI Compose');
+        } else {
+            const err = await resp.json();
+            if (window.Toast) Toast.error(err.detail || 'Failed to generate email', 'Compose Failed');
+        }
+    } catch (err) {
+        if (window.Toast) Toast.error('Cannot connect to server. Is the backend running?', 'Server Error');
+        console.error('[Compose]', err);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg> Generate with AI`;
+}
+
+async function sendAiCompose() {
+    const to      = document.getElementById('compose-to').value.trim();
+    const subject = document.getElementById('compose-subject').value.trim();
+    const body    = document.getElementById('compose-body').value.trim();
+
+    if (!to || !subject || !body) {
+        if (window.Toast) Toast.warn('All fields are required before sending.', 'Missing Fields');
+        return;
+    }
+
+    const btn = document.getElementById('compose-send-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+        const resp = await fetch(`${API_BASE}/gmail/send`, {
+            method:  'POST',
+            headers: window.Auth.getHeaders(),
+            body:    JSON.stringify({ to, subject, body }),
+        });
+
+        if (resp.ok) {
+            if (window.Toast) Toast.success(`Email sent to ${to}!`, 'Sent ✅');
+            addDecisionLog(`📨 Compose email sent to ${to}`);
+            closeComposeModal();
+        } else {
+            const err = await resp.json();
+            if (window.Toast) Toast.error(err.detail || 'Failed to send email', 'Send Failed');
+        }
+    } catch (err) {
+        if (window.Toast) Toast.error('Cannot connect to server.', 'Server Error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send via Gmail';
+}
+
+// ══════════════════════════════════════════════════════
+//  UPDATED — Welcome name uses id="welcome-name"
+// ══════════════════════════════════════════════════════
+
+function loadUserProfile() {
+    const user = window.Auth ? window.Auth.getUser() : null;
+    if (!user) return;
+
+    const name  = user.name || user.username || user.email || 'User';
+    const first = name.split(' ')[0];
+
+    const avatar = document.getElementById('user-avatar');
+    if (avatar) {
+        avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&rounded=true`;
+        avatar.alt = name;
+    }
+
+    const welcomeEl = document.getElementById('welcome-name');
+    if (welcomeEl) welcomeEl.textContent = `Welcome back, ${first} 👋`;
+
+    const dropName  = document.getElementById('dropdown-name');
+    const dropEmail = document.getElementById('dropdown-email');
+    if (dropName)  dropName.textContent  = name;
+    if (dropEmail) dropEmail.textContent = user.email || '';
+}
+
+// ══════════════════════════════════════════════════════
+//  Expose all functions globally
+// ══════════════════════════════════════════════════════
+window.openComposeModal       = openComposeModal;
+window.closeComposeModal      = closeComposeModal;
+window.loadActivity           = loadActivity;
+window.loadAutomationTasks    = loadAutomationTasks;
+window.generateAiCompose      = generateAiCompose;
+window.sendAiCompose          = sendAiCompose;
+window.connectGmail           = connectGmail;
+window.disconnectGmail        = disconnectGmail;
+window.openClassifyWithEmail  = openClassifyWithEmail;
+window.openEmailModal         = openEmailModal;
+window.closeEmailModal        = closeEmailModal;
+window.replyFromModal         = replyFromModal;
+window.onEmailSelected        = onEmailSelected;
+window.onEmailSelectedSmartReply = onEmailSelectedSmartReply;
+window.selectTone             = selectTone;
+window.generateAiReply        = generateAiReply;
+window.sendAiReply            = sendAiReply;
+window.sendInboxChat          = sendInboxChat;
+window.snoozeEmail            = snoozeEmail;
+window.filterUrgentEmails     = filterUrgentEmails;
+window.nextEmailPage          = nextEmailPage;
+window.prevEmailPage          = prevEmailPage;
+window.toggleProfileMenu      = toggleProfileMenu;
+window.signOutFromDashboard   = signOutFromDashboard;
+window.loadUserProfile        = loadUserProfile;
+window.updateBriefingBanner   = updateBriefingBanner;

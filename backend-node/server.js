@@ -59,6 +59,7 @@ function loadRoutes() {
     app.use(require('./routes/settings'));
     app.use(require('./routes/gmail'));
     app.use(require('./routes/automations'));
+    app.use(require('./routes/ai'));          // ← OpenRouter AI endpoints
 
     // 404
     app.use((req, res) => {
