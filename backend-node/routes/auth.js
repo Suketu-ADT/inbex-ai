@@ -33,8 +33,8 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000);
 
-// ── Resend client ──
-const resend = new Resend(config.resendApiKey);
+// ── Resend client (fallback key prevents crash if env var is empty) ──
+const resend = new Resend(config.resendApiKey || 're_dummy_key_for_dev_mode');
 
 /**
  * Check whether Resend is properly configured (not a placeholder key).
