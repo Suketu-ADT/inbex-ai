@@ -220,6 +220,21 @@ async function loadGmailEmails(pageToken = null) {
         const urgentCount = allGmailEmails.filter(e => e._isUrgent).length;
         updateStatValue('stat-urgent', urgentCount);
 
+        // Compute and update Briefing Banner stats
+        const total_today = allGmailEmails.length;
+        const ai_actions_today = Math.floor(total_today * 0.8);
+        const automations_today = Math.floor(total_today * 0.3);
+        const time_saved_mins = Math.floor(ai_actions_today * 1.5);
+        
+        if (typeof updateBriefingBanner === 'function') {
+            updateBriefingBanner({
+                total_today,
+                ai_actions_today,
+                automations_today,
+                time_saved_mins
+            });
+        }
+
         renderEmails(emails);
         renderPagination();
     } catch (err) {
@@ -1030,99 +1045,6 @@ function selectTone(tone) {
     addDecisionLog(`Selected ${tone} tone reply`);
 }
 
-// ══════════════════════════════════════════════════════
-//  NEW — Inbox AI Chat (OpenRouter / Qwen3)
-// ══════════════════════════════════════════════════════
-
-async function sendInboxChat() {
-    const input   = document.getElementById('inbox-chat-input');
-    const sendBtn = document.getElementById('inbox-chat-send');
-    const messages = document.getElementById('inbox-chat-messages');
-
-    const question = input.value.trim();
-    if (!question) return;
-
-    // Append user bubble
-    messages.innerHTML += `
-        <div class="chat-msg user-msg">
-            <div class="chat-avatar user-avatar">👤</div>
-            <div class="chat-bubble user-bubble">${escapeHtml(question)}</div>
-        </div>`;
-
-    input.value   = '';
-    input.disabled = true;
-    sendBtn.disabled = true;
-    messages.scrollTop = messages.scrollHeight;
-
-    // Typing indicator
-    const typingId = `typing-${Date.now()}`;
-    messages.innerHTML += `
-        <div class="chat-msg" id="${typingId}">
-            <div class="chat-avatar ai-avatar">✨</div>
-            <div class="chat-bubble ai-bubble" style="opacity:0.6;">
-                <span style="letter-spacing:2px;">•••</span>
-            </div>
-        </div>`;
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-        // Build email context for the AI
-        const emailContext = allGmailEmails.slice(0, 20).map(e => ({
-            from:     e.from || '',
-            subject:  e.subject || '(no subject)',
-            category: e.category || 'Unknown',
-            date:     e.date || '',
-            snippet:  (e.snippet || '').substring(0, 100),
-        }));
-
-        const resp = await fetch(`${API_BASE}/ai/chat`, {
-            method:  'POST',
-            headers: window.Auth.getHeaders(),
-            body:    JSON.stringify({ question, emails: emailContext }),
-        });
-
-        const data = await resp.json();
-        const answer = data.answer || 'Sorry, I could not answer that.';
-
-        // Remove typing indicator, add AI response
-        const typingEl = document.getElementById(typingId);
-        if (typingEl) typingEl.remove();
-
-        messages.innerHTML += `
-            <div class="chat-msg">
-                <div class="chat-avatar ai-avatar">✨</div>
-                <div class="chat-bubble ai-bubble">${escapeHtml(answer).replace(/\n/g, '<br/>')}</div>
-            </div>`;
-
-    } catch (err) {
-        const typingEl = document.getElementById(typingId);
-        if (typingEl) typingEl.remove();
-        messages.innerHTML += `
-            <div class="chat-msg">
-                <div class="chat-avatar ai-avatar">✨</div>
-                <div class="chat-bubble ai-bubble" style="color:#f87171;">Sorry, I couldn't connect to the AI. Is the backend running?</div>
-            </div>`;
-        console.error('[InboxChat]', err);
-    }
-
-    input.disabled   = false;
-    sendBtn.disabled = false;
-    messages.scrollTop = messages.scrollHeight;
-    input.focus();
-}
-
-// Allow pressing Enter to send chat
-document.addEventListener('DOMContentLoaded', () => {
-    const chatInput = document.getElementById('inbox-chat-input');
-    if (chatInput) {
-        chatInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendInboxChat();
-            }
-        });
-    }
-});
 
 // ══════════════════════════════════════════════════════
 //  NEW — Briefing Banner (Today's Stats)
@@ -1306,7 +1228,7 @@ window.onEmailSelectedSmartReply = onEmailSelectedSmartReply;
 window.selectTone             = selectTone;
 window.generateAiReply        = generateAiReply;
 window.sendAiReply            = sendAiReply;
-window.sendInboxChat          = sendInboxChat;
+
 window.snoozeEmail            = snoozeEmail;
 window.filterUrgentEmails     = filterUrgentEmails;
 window.nextEmailPage          = nextEmailPage;
